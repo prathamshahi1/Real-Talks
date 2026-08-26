@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 import { connectDB } from './config/db.js';
+import authRoutes from './routes/authRoutes.js';
 
 // 1. Load Environment Variables
 dotenv.config();
@@ -70,7 +71,10 @@ const globalLimiter = rateLimit({
 });
 app.use('/api', globalLimiter);
 
-// 6. Base Health Check Route
+// 6. API Routes
+app.use('/api/auth', authRoutes);
+
+// Base Health Check Route
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     success: true,
