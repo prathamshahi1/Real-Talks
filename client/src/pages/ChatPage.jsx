@@ -5,13 +5,14 @@ import ChatSidebar from '../components/chat/ChatSidebar';
 import ChatWindow from '../components/chat/ChatWindow';
 import UserSearchModal from '../components/UserSearchModal';
 import ProfileModal from '../components/ProfileModal';
+import CreateGroupModal from '../components/chat/CreateGroupModal';
 import {
   MessageSquare,
   LogOut,
   Settings,
   Search,
   UserPlus,
-  Radio
+  Users
 } from 'lucide-react';
 
 const ChatPage = () => {
@@ -20,6 +21,7 @@ const ChatPage = () => {
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
 
   const handleSelectUserFromSearch = async (targetUser) => {
     try {
@@ -42,8 +44,17 @@ const ChatPage = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5 sm:gap-3">
-          {/* Search Trigger */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Create Group Button */}
+          <button
+            onClick={() => setIsCreateGroupOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-600/15 hover:bg-violet-600/25 text-violet-300 hover:text-white border border-violet-500/30 text-xs font-semibold transition-all cursor-pointer"
+          >
+            <Users className="w-3.5 h-3.5 text-violet-400" />
+            <span className="hidden md:inline">New Group</span>
+          </button>
+
+          {/* Search Direct Users */}
           <button
             onClick={() => setIsSearchOpen(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60 text-xs font-semibold transition-all cursor-pointer"
@@ -57,7 +68,7 @@ const ChatPage = () => {
             onClick={() => setIsProfileOpen(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60 text-xs font-semibold transition-all cursor-pointer"
           >
-            <Settings className="w-3.5 h-3.5 text-violet-400" />
+            <Settings className="w-3.5 h-3.5 text-slate-400" />
             <span className="hidden md:inline">Settings</span>
           </button>
 
@@ -89,16 +100,17 @@ const ChatPage = () => {
 
       {/* 2. Chat Layout (Sidebar + ChatWindow) */}
       <main className="flex-1 flex overflow-hidden relative">
-        {/* On mobile: show sidebar if no active conversation, else hide sidebar */}
         <div
           className={`w-full md:w-auto h-full flex-shrink-0 ${
             activeConversation ? 'hidden md:flex' : 'flex'
           }`}
         >
-          <ChatSidebar onOpenSearch={() => setIsSearchOpen(true)} />
+          <ChatSidebar
+            onOpenSearch={() => setIsSearchOpen(true)}
+            onOpenCreateGroup={() => setIsCreateGroupOpen(true)}
+          />
         </div>
 
-        {/* On mobile: show chat window if conversation selected, else hide */}
         <div
           className={`w-full flex-1 h-full ${
             activeConversation ? 'flex' : 'hidden md:flex'
@@ -115,7 +127,13 @@ const ChatPage = () => {
         onSelectUser={handleSelectUserFromSearch}
       />
 
-      {/* 4. Profile & Privacy Settings Modal */}
+      {/* 4. Create Group Channel Modal */}
+      <CreateGroupModal
+        isOpen={isCreateGroupOpen}
+        onClose={() => setIsCreateGroupOpen(false)}
+      />
+
+      {/* 5. Profile & Privacy Settings Modal */}
       <ProfileModal
         isOpen={isProfileOpen}
         onClose={() => setIsProfileOpen(false)}

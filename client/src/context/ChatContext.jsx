@@ -227,6 +227,91 @@ export const ChatProvider = ({ children }) => {
     });
   };
 
+  // 8. Group Actions
+  const createGroup = async (groupData) => {
+    try {
+      const res = await api.post('/groups', groupData);
+      if (res.data.success) {
+        const newGroup = res.data.group;
+        setConversations((prev) => [newGroup, ...prev]);
+        selectConversation(newGroup);
+        return newGroup;
+      }
+    } catch (err) {
+      console.error('Create group error:', err);
+      throw err;
+    }
+  };
+
+  const addMembersToGroup = async (groupId, memberIds) => {
+    try {
+      const res = await api.post(`/groups/${groupId}/members`, { memberIds });
+      if (res.data.success) {
+        const updatedGroup = res.data.group;
+        setConversations((prev) =>
+          prev.map((c) => (c._id === groupId ? updatedGroup : c))
+        );
+        if (activeConversation?._id === groupId) {
+          setActiveConversation(updatedGroup);
+        }
+      }
+    } catch (err) {
+      console.error('Add members error:', err);
+      throw err;
+    }
+  };
+
+  const removeMemberFromGroup = async (groupId, memberId) => {
+    try {
+      const res = await api.delete(`/groups/${groupId}/members/${memberId}`);
+      if (res.data.success) {
+        const updatedGroup = res.data.group;
+        setConversations((prev) =>
+          prev.map((c) => (c._id === groupId ? updatedGroup : c))
+        );
+        if (activeConversation?._id === groupId) {
+          setActiveConversation(updatedGroup);
+        }
+      }
+    } catch (err) {
+      console.error('Remove member error:', err);
+      throw err;
+    }
+  };
+
+  const leaveGroup = async (groupId) => {
+    try {
+      const res = await api.post(`/groups/${groupId}/leave`);
+      if (res.data.success) {
+        setConversations((prev) => prev.filter((c) => c._id !== groupId));
+        if (activeConversation?._id === groupId) {
+          setActiveConversation(null);
+        }
+      }
+    } catch (err) {
+      console.error('Leave group error:', err);
+      throw err;
+    }
+  };
+
+  const promoteToAdmin = async (groupId, memberId) => {
+    try {
+      const res = await api.post(`/groups/${groupId}/admins/${memberId}`);
+      if (res.data.success) {
+        const updatedGroup = res.data.group;
+        setConversations((prev) =>
+          prev.map((c) => (c._id === groupId ? updatedGroup : c))
+        );
+        if (activeConversation?._id === groupId) {
+          setActiveConversation(updatedGroup);
+        }
+      }
+    } catch (err) {
+      console.error('Promote admin error:', err);
+      throw err;
+    }
+  };
+
   // 8. Setup Global Socket Listeners
   useEffect(() => {
     if (!user) return;
@@ -388,6 +473,11 @@ export const ChatProvider = ({ children }) => {
         editMessage,
         deleteMessage,
         emitTyping,
+        createGroup,
+        addMembersToGroup,
+        removeMemberFromGroup,
+        leaveGroup,
+        promoteToAdmin,
       }}
     >
       {children}

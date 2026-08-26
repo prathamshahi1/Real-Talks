@@ -23,6 +23,17 @@ const conversationSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    groupDescription: {
+      type: String,
+      trim: true,
+      default: '',
+      maxlength: [300, 'Group description cannot exceed 300 characters'],
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
     groupAdmin: [
       {
         type: mongoose.Schema.Types.ObjectId,

@@ -12,6 +12,7 @@ import userRoutes from './routes/userRoutes.js';
 import conversationRoutes from './routes/conversationRoutes.js';
 import messageRoutes from './routes/messageRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
+import groupRoutes from './routes/groupRoutes.js';
 import { setupSocket } from './socket/chatSocket.js';
 
 // 1. Load Environment Variables
@@ -86,6 +87,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/conversations', conversationRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/groups', groupRoutes);
 
 // Base Health Check Route
 app.get('/api/health', (req, res) => {

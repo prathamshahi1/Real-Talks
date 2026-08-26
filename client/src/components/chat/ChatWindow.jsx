@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import EmojiPicker from 'emoji-picker-react';
 import ImagePreviewModal from './ImagePreviewModal';
 import ImageLightboxModal from './ImageLightboxModal';
+import GroupInfoModal from './GroupInfoModal';
 import {
   Send,
   Smile,
@@ -22,7 +23,9 @@ import {
   MessageSquare,
   Sparkles,
   Flame,
-  Download
+  Download,
+  Info,
+  Users
 } from 'lucide-react';
 
 const ChatWindow = ({ onBack }) => {
@@ -49,22 +52,30 @@ const ChatWindow = ({ onBack }) => {
   const [sending, setSending] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
 
-  // Image Upload & Lightbox state
+  // Modals state
   const [selectedImageFile, setSelectedImageFile] = useState(null);
   const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
   const [activeLightboxUrl, setActiveLightboxUrl] = useState(null);
+  const [isGroupInfoOpen, setIsGroupInfoOpen] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
 
   const fileInputRef = useRef(null);
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
-  // Helper: Extract other participant
-  const otherParticipant = activeConversation?.participants?.find(
-    (p) => p._id !== user?._id
-  ) || activeConversation?.participants?.[0];
+  const isGroup = activeConversation?.type === 'group';
+
+  // Helper: Extract other participant for private chats
+  const otherParticipant = isGroup
+    ? null
+    : activeConversation?.participants?.find((p) => (p._id || p) !== user?._id) ||
+      activeConversation?.participants?.[0];
+
+  const displayName = isGroup ? activeConversation.groupName : otherParticipant?.name;
+  const avatarUrl = isGroup ? activeConversation.groupAvatar : otherParticipant?.avatar;
 
   const isOnline =
+    !isGroup &&
     otherParticipant &&
     onlineUsers.has(otherParticipant._id) &&
     otherParticipant.privacy?.showOnlineStatus !== false;
@@ -72,7 +83,7 @@ const ChatWindow = ({ onBack }) => {
   const currentTypingList = typingUsers[activeConversation?._id] || [];
   const isOtherTyping = currentTypingList.length > 0;
 
-  // Auto-scroll to bottom when messages arrive
+  // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isOtherTyping]);
@@ -127,11 +138,9 @@ const ChatWindow = ({ onBack }) => {
     }
   };
 
-  // Image Selection Handler
   const handleFileSelect = (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Validate file size (< 5MB)
       if (file.size > 5 * 1024 * 1024) {
         alert('File size exceeds 5MB limit. Please select a smaller image.');
         return;
@@ -139,10 +148,9 @@ const ChatWindow = ({ onBack }) => {
       setSelectedImageFile(file);
       setIsImagePreviewOpen(true);
     }
-    e.target.value = ''; // Reset input
+    e.target.value = '';
   };
 
-  // Confirm Send Image with optional caption
   const handleSendImageConfirm = async ({ file, caption }) => {
     setUploadingImage(true);
     try {
@@ -188,7 +196,7 @@ const ChatWindow = ({ onBack }) => {
         </div>
         <h3 className="text-xl font-bold text-white mb-1">Your Messages</h3>
         <p className="text-sm text-slate-400 max-w-sm">
-          Select a chat from the sidebar or click &quot;New Chat&quot; to begin a conversation.
+          Select a chat or group channel from the sidebar to begin messaging.
         </p>
       </div>
     );
@@ -217,13 +225,20 @@ const ChatWindow = ({ onBack }) => {
             </button>
           )}
 
-          <div className="relative">
+          <div
+            className="relative cursor-pointer"
+            onClick={() => isGroup && setIsGroupInfoOpen(true)}
+          >
             <img
-              src={otherParticipant?.avatar}
-              alt={otherParticipant?.name}
+              src={avatarUrl}
+              alt={displayName}
               className="w-11 h-11 rounded-2xl bg-slate-800 object-cover border border-slate-700/80"
             />
-            {isOnline ? (
+            {isGroup ? (
+              <span className="absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded-md bg-violet-600 text-[9px] font-bold text-white shadow-sm flex items-center gap-0.5">
+                <Users className="w-2.5 h-2.5" />
+              </span>
+            ) : isOnline ? (
               <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-slate-900 shadow-sm"></span>
             ) : (
               <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-slate-600 border-2 border-slate-900"></span>
@@ -231,14 +246,31 @@ const ChatWindow = ({ onBack }) => {
           </div>
 
           <div>
-            <h3 className="font-bold text-white text-base leading-tight">
-              {otherParticipant?.name || 'Chat Participant'}
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className="font-bold text-white text-base leading-tight">
+                {displayName || 'Chat Room'}
+              </h3>
+              {isGroup && (
+                <button
+                  onClick={() => setIsGroupInfoOpen(true)}
+                  className="p-1 rounded-lg text-slate-400 hover:text-indigo-300 hover:bg-slate-800"
+                  title="Group Details"
+                >
+                  <Info className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
             <div className="flex items-center gap-1.5 text-xs mt-0.5">
               {isOtherTyping ? (
                 <span className="text-indigo-400 font-medium animate-pulse flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-ping"></span>
-                  typing a message...
+                  {currentTypingList.join(', ')} typing...
+                </span>
+              ) : isGroup ? (
+                <span className="text-violet-400 font-medium flex items-center gap-1">
+                  <Users className="w-3 h-3" />
+                  {activeConversation.participants?.length || 0} members
                 </span>
               ) : isOnline ? (
                 <span className="text-emerald-400 font-medium flex items-center gap-1">
@@ -257,7 +289,10 @@ const ChatWindow = ({ onBack }) => {
         </div>
 
         {/* 24-Hour TTL Auto-Delete Status Badge */}
-        <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[11px] font-medium" title="MongoDB TTL index active: messages auto-delete after 24h to preserve free tier cloud storage">
+        <div
+          className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[11px] font-medium"
+          title="MongoDB TTL index active: messages auto-delete after 24h to preserve free tier cloud storage"
+        >
           <Flame className="w-3.5 h-3.5 text-amber-400" />
           <span>24h Auto-Clean Active</span>
         </div>
@@ -276,18 +311,26 @@ const ChatWindow = ({ onBack }) => {
               <MessageSquare className="w-6 h-6" />
             </div>
             <p className="font-semibold text-slate-300 text-sm">No messages here yet</p>
-            <p>Send a message or share an image to begin chatting with {otherParticipant?.name}!</p>
+            <p>Send a message or share an image to begin chatting with {displayName}!</p>
           </div>
         ) : (
           messages.map((msg) => {
             const isMe = msg.sender === user?._id || msg.sender?._id === user?._id;
+            const senderName = msg.sender?.name || 'Member';
 
             return (
               <div
                 key={msg._id}
                 className={`flex flex-col group ${isMe ? 'items-end' : 'items-start'}`}
               >
-                {/* Bubble Wrapper with Hover Action Bar */}
+                {/* Sender Name for Group Chats */}
+                {isGroup && !isMe && (
+                  <span className="text-[11px] font-semibold text-indigo-400 ml-2 mb-1">
+                    {senderName}
+                  </span>
+                )}
+
+                {/* Bubble Wrapper */}
                 <div className="relative max-w-[85%] sm:max-w-[70%]">
                   {/* Action Buttons Toolbar on Hover */}
                   <div
@@ -343,7 +386,7 @@ const ChatWindow = ({ onBack }) => {
                         : 'bg-slate-900 border border-slate-800 text-slate-100 rounded-bl-sm'
                     } ${msg.isDeleted ? 'opacity-60 italic' : ''}`}
                   >
-                    {/* Reply To Reference Quote */}
+                    {/* Reply Quote Header */}
                     {msg.replyTo && (
                       <div
                         className={`mb-2 p-2 rounded-xl text-xs border-l-2 flex flex-col ${
@@ -363,7 +406,7 @@ const ChatWindow = ({ onBack }) => {
                       </div>
                     )}
 
-                    {/* Image Attachment (if message type is image) */}
+                    {/* Image Attachment */}
                     {msg.mediaUrl && !msg.isDeleted && (
                       <div className="mb-2 relative group/img cursor-pointer overflow-hidden rounded-2xl">
                         <img
@@ -421,7 +464,9 @@ const ChatWindow = ({ onBack }) => {
               <span className="w-2 h-2 rounded-full bg-indigo-400 animate-bounce [animation-delay:0.2s]"></span>
               <span className="w-2 h-2 rounded-full bg-indigo-400 animate-bounce [animation-delay:0.4s]"></span>
             </div>
-            <span className="text-[11px] text-slate-500">{otherParticipant?.name} is typing...</span>
+            <span className="text-[11px] text-slate-500">
+              {currentTypingList.join(', ')} is typing...
+            </span>
           </div>
         )}
 
@@ -476,7 +521,6 @@ const ChatWindow = ({ onBack }) => {
       {/* 5. Message Composer */}
       <footer className="p-3 sm:p-4 border-t border-slate-800/80 bg-slate-900/80 backdrop-blur-xl">
         <form onSubmit={handleSendMessage} className="flex items-center gap-2">
-          {/* File Attachment Button */}
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
@@ -486,7 +530,6 @@ const ChatWindow = ({ onBack }) => {
             <Paperclip className="w-5 h-5" />
           </button>
 
-          {/* Emoji Toggle Button */}
           <button
             type="button"
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
@@ -499,7 +542,6 @@ const ChatWindow = ({ onBack }) => {
             <Smile className="w-5 h-5" />
           </button>
 
-          {/* Text Input */}
           <input
             type="text"
             value={inputContent}
@@ -507,12 +549,11 @@ const ChatWindow = ({ onBack }) => {
             placeholder={
               editingMessage
                 ? 'Edit your message...'
-                : `Message ${otherParticipant?.name || 'user'}...`
+                : `Message ${displayName || 'group'}...`
             }
             className="flex-1 px-4 py-3 rounded-2xl bg-slate-950/80 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-white placeholder-slate-500 text-sm outline-none transition-all"
           />
 
-          {/* Send / Update Button */}
           <button
             type="submit"
             disabled={!inputContent.trim() || sending}
@@ -529,7 +570,7 @@ const ChatWindow = ({ onBack }) => {
         </form>
       </footer>
 
-      {/* 6. Image Preview Before Sending Modal */}
+      {/* 6. Image Preview Modal */}
       <ImagePreviewModal
         isOpen={isImagePreviewOpen}
         imageFile={selectedImageFile}
@@ -547,6 +588,15 @@ const ChatWindow = ({ onBack }) => {
         imageUrl={activeLightboxUrl}
         onClose={() => setActiveLightboxUrl(null)}
       />
+
+      {/* 8. Group Info Modal */}
+      {isGroup && (
+        <GroupInfoModal
+          isOpen={isGroupInfoOpen}
+          onClose={() => setIsGroupInfoOpen(false)}
+          group={activeConversation}
+        />
+      )}
     </div>
   );
 };
