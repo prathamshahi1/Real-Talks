@@ -160,11 +160,16 @@ export const login = async (req, res) => {
     await user.save();
 
     // Generate JWT & Set Cookie
-    generateTokenAndSetCookie(user._id, res);
+    const token = generateTokenAndSetCookie(user._id, res);
 
     res.status(200).json({
+
       success: true,
+
       message: 'Logged in successfully!',
+
+      token,
+
       user: {
         _id: user._id,
         name: user.name,

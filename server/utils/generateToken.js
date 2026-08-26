@@ -14,10 +14,10 @@ export const generateTokenAndSetCookie = (userId, res) => {
   const isProduction = process.env.NODE_ENV === 'production';
 
   res.cookie('token', token, {
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
-    httpOnly: true, // Shields against XSS attacks (JS cannot read cookie)
-    sameSite: isProduction ? 'strict' : 'lax', // CSRF protection
-    secure: isProduction, // HTTPS only in production
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    httpOnly: true,
+    sameSite: isProduction ? 'none' : 'lax', // 'none' enables cross-origin cookies between Vercel & Render
+    secure: isProduction ? true : false, // HTTPS required for sameSite: 'none'
   });
 
   return token;

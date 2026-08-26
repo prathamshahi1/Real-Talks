@@ -20,11 +20,13 @@ dotenv.config();
 
 // 2. Initialize Express Application & HTTP Server
 const app = express();
+app.set('trust proxy', 1);
 const server = http.createServer(app);
 
 const PORT = process.env.PORT || 5050;
 const allowedOrigins = [
   process.env.CLIENT_URL,
+  'https://real-talks-eight.vercel.app',
   'http://localhost:5173',
   'http://localhost:5174',
   'http://localhost:5175',
@@ -34,6 +36,13 @@ const allowedOrigins = [
   'http://127.0.0.1:5175',
   'http://localhost:3000',
 ].filter(Boolean);
+
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+  if (allowedOrigins.includes(origin)) return true;
+  if (origin.endsWith('.vercel.app')) return true;
+  return false;
+};
 
 // 3. Connect to Database
 connectDB();
@@ -60,10 +69,10 @@ setupSocket(io);
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (isAllowedOrigin(origin)) {
         return callback(null, true);
       }
-      return callback(new Error('CORS not allowed'));
+      return callback(new Error('CORS not allowed for this origin: ' + origin));
     },
     credentials: true,
   })

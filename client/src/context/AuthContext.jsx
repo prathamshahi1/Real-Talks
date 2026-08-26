@@ -14,12 +14,17 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       const res = await api.get('/auth/me');
       if (res.data.success && res.data.user) {
+        if (res.data.token) {
+          localStorage.setItem('real_talks_token', res.data.token);
+        }
         setUser(res.data.user);
       } else {
-        setUser(null);
+        localStorage.removeItem('real_talks_token');
+      setUser(null);
       }
     } catch (err) {
       // 401 Unauthorized is expected if user is not logged in
+      localStorage.removeItem('real_talks_token');
       setUser(null);
     } finally {
       setLoading(false);
@@ -36,6 +41,9 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await api.post('/auth/register', userData);
       if (res.data.success && res.data.user) {
+        if (res.data.token) {
+          localStorage.setItem('real_talks_token', res.data.token);
+        }
         setUser(res.data.user);
         return { success: true, message: res.data.message };
       }
@@ -53,6 +61,9 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await api.post('/auth/login', credentials);
       if (res.data.success && res.data.user) {
+        if (res.data.token) {
+          localStorage.setItem('real_talks_token', res.data.token);
+        }
         setUser(res.data.user);
         return { success: true, message: res.data.message };
       }
@@ -71,6 +82,7 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.error('Logout error:', err);
     } finally {
+      localStorage.removeItem('real_talks_token');
       setUser(null);
     }
   };
