@@ -1,12 +1,13 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ChatProvider } from './context/ChatContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
+import ChatPage from './pages/ChatPage';
 
-// Root path director: redirects to /dashboard if logged in, else /login
+// Root path director: redirects to /chat if logged in, else /login
 const RootRedirect = () => {
   const { isAuthenticated, loading } = useAuth();
   if (loading) {
@@ -16,27 +17,30 @@ const RootRedirect = () => {
       </div>
     );
   }
-  return isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />;
+  return isAuthenticated ? <Navigate to="/chat" replace /> : <Navigate to="/login" replace />;
 };
 
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<RootRedirect />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          
-          {/* Protected Application Routes */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-          </Route>
+      <ChatProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<RootRedirect />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
-          {/* Catch-all fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Router>
+            {/* Protected Application Routes */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/chat" element={<ChatPage />} />
+              <Route path="/dashboard" element={<Navigate to="/chat" replace />} />
+            </Route>
+
+            {/* Catch-all fallback */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Router>
+      </ChatProvider>
     </AuthProvider>
   );
 }

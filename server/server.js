@@ -8,6 +8,9 @@ import rateLimit from 'express-rate-limit';
 import { connectDB } from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import conversationRoutes from './routes/conversationRoutes.js';
+import messageRoutes from './routes/messageRoutes.js';
+import { setupSocket } from './socket/chatSocket.js';
 
 // 1. Load Environment Variables
 dotenv.config();
@@ -31,7 +34,6 @@ connectDB();
 const io = new Server(server, {
   cors: {
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl, or same-origin)
       if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
@@ -42,6 +44,9 @@ const io = new Server(server, {
   },
   pingTimeout: 60000,
 });
+
+// Setup Real-Time Socket.IO Engine & Event Handlers
+setupSocket(io);
 
 // 5. Global Middlewares
 app.use(
@@ -62,7 +67,7 @@ app.use(cookieParser());
 // Rate Limiter for DDoS & Brute-force protection
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 300, // Limit each IP to 300 requests per window
+  max: 500, // Generous limit for real-time applications
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -75,6 +80,8 @@ app.use('/api', globalLimiter);
 // 6. API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/conversations', conversationRoutes);
+app.use('/api/messages', messageRoutes);
 
 // Base Health Check Route
 app.get('/api/health', (req, res) => {
@@ -88,24 +95,7 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// 7. Base Socket.IO Baseline Listener
-io.on('connection', (socket) => {
-  console.log(`🔌 Client connected to Socket.IO: ${socket.id}`);
-
-  socket.on('ping_server', (data) => {
-    socket.emit('pong_client', {
-      message: 'Server received your ping!',
-      timestamp: new Date().toISOString(),
-      echo: data,
-    });
-  });
-
-  socket.on('disconnect', (reason) => {
-    console.log(`❌ Client disconnected: ${socket.id} (Reason: ${reason})`);
-  });
-});
-
-// 8. 404 Route Handler
+// 7. 404 Route Handler
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -113,7 +103,7 @@ app.use((req, res) => {
   });
 });
 
-// 9. Centralized Global Error Handler Middleware
+// 8. Centralized Global Error Handler Middleware
 app.use((err, req, res, next) => {
   console.error('Unhandled Error:', err);
   const statusCode = err.statusCode || 500;
@@ -124,17 +114,16 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 10. Start Server
+// 9. Start Server
 server.listen(PORT, () => {
   console.log(`
 🚀 ==================================================== 🚀
    Real-Time Chat Server running on: http://localhost:${PORT}
    Allowed Origins:                 ${allowedOrigins.join(', ')}
    Environment:                     ${process.env.NODE_ENV || 'development'}
-   Socket.IO is ready for real-time bidirectional communication
+   Socket.IO & Real-Time Engine Active
 🚀 ==================================================== 🚀
   `);
 });
 
-// Export instances for testing or modular extension
 export { app, server, io };
