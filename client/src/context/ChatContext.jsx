@@ -145,6 +145,32 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
+  // Send Image Message (Upload + Message Dispatch)
+  const sendImageMessage = async ({ file, caption, replyTo }) => {
+    if (!activeConversation || !file) return;
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      // Upload file to server/Cloudinary
+      const uploadRes = await api.post('/upload/image', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      if (uploadRes.data.success && uploadRes.data.url) {
+        return await sendMessage({
+          content: caption,
+          mediaUrl: uploadRes.data.url,
+          replyTo,
+        });
+      }
+    } catch (err) {
+      console.error('Send image error:', err);
+      throw err;
+    }
+  };
+
   // 5. Edit Message
   const editMessage = async (messageId, newContent) => {
     try {
@@ -358,6 +384,7 @@ export const ChatProvider = ({ children }) => {
         selectConversation,
         startConversationWithUser,
         sendMessage,
+        sendImageMessage,
         editMessage,
         deleteMessage,
         emitTyping,

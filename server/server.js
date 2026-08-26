@@ -6,10 +6,12 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 import { connectDB } from './config/db.js';
+import path from 'path';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import conversationRoutes from './routes/conversationRoutes.js';
 import messageRoutes from './routes/messageRoutes.js';
+import uploadRoutes from './routes/uploadRoutes.js';
 import { setupSocket } from './socket/chatSocket.js';
 
 // 1. Load Environment Variables
@@ -77,11 +79,13 @@ const globalLimiter = rateLimit({
 });
 app.use('/api', globalLimiter);
 
-// 6. API Routes
+// 6. API Routes & Static Media Serving
+app.use('/uploads', express.static(path.resolve('uploads')));
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/conversations', conversationRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // Base Health Check Route
 app.get('/api/health', (req, res) => {

@@ -2,9 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useChat } from '../../context/ChatContext';
 import { useAuth } from '../../context/AuthContext';
 import EmojiPicker from 'emoji-picker-react';
+import ImagePreviewModal from './ImagePreviewModal';
+import ImageLightboxModal from './ImageLightboxModal';
 import {
   Send,
   Smile,
+  Paperclip,
   Reply,
   Edit2,
   Trash2,
@@ -17,7 +20,9 @@ import {
   Loader2,
   Clock,
   MessageSquare,
-  ShieldAlert
+  Sparkles,
+  Flame,
+  Download
 } from 'lucide-react';
 
 const ChatWindow = ({ onBack }) => {
@@ -26,6 +31,7 @@ const ChatWindow = ({ onBack }) => {
     activeConversation,
     messages,
     sendMessage,
+    sendImageMessage,
     editMessage,
     deleteMessage,
     replyingTo,
@@ -43,6 +49,13 @@ const ChatWindow = ({ onBack }) => {
   const [sending, setSending] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
 
+  // Image Upload & Lightbox state
+  const [selectedImageFile, setSelectedImageFile] = useState(null);
+  const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
+  const [activeLightboxUrl, setActiveLightboxUrl] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  const fileInputRef = useRef(null);
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
@@ -59,23 +72,19 @@ const ChatWindow = ({ onBack }) => {
   const currentTypingList = typingUsers[activeConversation?._id] || [];
   const isOtherTyping = currentTypingList.length > 0;
 
-  // Auto-scroll to bottom when new messages arrive
+  // Auto-scroll to bottom when messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isOtherTyping]);
 
-  // Set input content when editing a message
   useEffect(() => {
     if (editingMessage) {
       setInputContent(editingMessage.content);
     }
   }, [editingMessage]);
 
-  // Handle typing debounce
   const handleInputChange = (e) => {
     setInputContent(e.target.value);
-
-    // Emit typing_start immediately
     emitTyping(true);
 
     if (typingTimeoutRef.current) {
@@ -92,7 +101,6 @@ const ChatWindow = ({ onBack }) => {
     if (!inputContent.trim()) return;
 
     if (editingMessage) {
-      // Execute Edit
       try {
         await editMessage(editingMessage._id, inputContent.trim());
         setInputContent('');
@@ -103,7 +111,6 @@ const ChatWindow = ({ onBack }) => {
       return;
     }
 
-    // Execute Send
     setSending(true);
     emitTyping(false);
     try {
@@ -120,6 +127,41 @@ const ChatWindow = ({ onBack }) => {
     }
   };
 
+  // Image Selection Handler
+  const handleFileSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file size (< 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size exceeds 5MB limit. Please select a smaller image.');
+        return;
+      }
+      setSelectedImageFile(file);
+      setIsImagePreviewOpen(true);
+    }
+    e.target.value = ''; // Reset input
+  };
+
+  // Confirm Send Image with optional caption
+  const handleSendImageConfirm = async ({ file, caption }) => {
+    setUploadingImage(true);
+    try {
+      await sendImageMessage({
+        file,
+        caption,
+        replyTo: replyingTo,
+      });
+      setIsImagePreviewOpen(false);
+      setSelectedImageFile(null);
+      setReplyingTo(null);
+    } catch (err) {
+      console.error('Failed to upload image:', err);
+      alert('Failed to upload image. Please try again.');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
   const handleEmojiClick = (emojiData) => {
     setInputContent((prev) => prev + emojiData.emoji);
   };
@@ -130,7 +172,6 @@ const ChatWindow = ({ onBack }) => {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  // Helper: Format message timestamp
   const formatMsgTime = (dateString) => {
     if (!dateString) return '';
     return new Date(dateString).toLocaleTimeString([], {
@@ -155,6 +196,15 @@ const ChatWindow = ({ onBack }) => {
 
   return (
     <div className="flex-1 flex flex-col bg-slate-950 relative h-full overflow-hidden">
+      {/* Hidden file input */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        accept="image/png, image/jpeg, image/webp, image/gif"
+        className="hidden"
+        onChange={handleFileSelect}
+      />
+
       {/* 1. Chat Header */}
       <header className="p-4 border-b border-slate-800/80 bg-slate-900/80 backdrop-blur-xl flex items-center justify-between z-10">
         <div className="flex items-center gap-3">
@@ -205,6 +255,12 @@ const ChatWindow = ({ onBack }) => {
             </div>
           </div>
         </div>
+
+        {/* 24-Hour TTL Auto-Delete Status Badge */}
+        <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[11px] font-medium" title="MongoDB TTL index active: messages auto-delete after 24h to preserve free tier cloud storage">
+          <Flame className="w-3.5 h-3.5 text-amber-400" />
+          <span>24h Auto-Clean Active</span>
+        </div>
       </header>
 
       {/* 2. Message History Feed */}
@@ -220,7 +276,7 @@ const ChatWindow = ({ onBack }) => {
               <MessageSquare className="w-6 h-6" />
             </div>
             <p className="font-semibold text-slate-300 text-sm">No messages here yet</p>
-            <p>Send a message below to start your conversation with {otherParticipant?.name}!</p>
+            <p>Send a message or share an image to begin chatting with {otherParticipant?.name}!</p>
           </div>
         ) : (
           messages.map((msg) => {
@@ -247,7 +303,7 @@ const ChatWindow = ({ onBack }) => {
                       <Reply className="w-3.5 h-3.5" />
                     </button>
                     <button
-                      onClick={() => handleCopy(msg.content, msg._id)}
+                      onClick={() => handleCopy(msg.content || msg.mediaUrl, msg._id)}
                       title="Copy"
                       className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
                     >
@@ -259,13 +315,15 @@ const ChatWindow = ({ onBack }) => {
                     </button>
                     {isMe && !msg.isDeleted && (
                       <>
-                        <button
-                          onClick={() => setEditingMessage(msg)}
-                          title="Edit"
-                          className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
-                        >
-                          <Edit2 className="w-3.5 h-3.5" />
-                        </button>
+                        {!msg.mediaUrl && (
+                          <button
+                            onClick={() => setEditingMessage(msg)}
+                            title="Edit"
+                            className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                         <button
                           onClick={() => deleteMessage(msg._id)}
                           title="Delete"
@@ -279,7 +337,7 @@ const ChatWindow = ({ onBack }) => {
 
                   {/* Message Bubble Card */}
                   <div
-                    className={`p-3.5 rounded-3xl text-sm leading-relaxed shadow-lg ${
+                    className={`p-3.5 rounded-3xl text-sm leading-relaxed shadow-lg overflow-hidden ${
                       isMe
                         ? 'bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white rounded-br-sm'
                         : 'bg-slate-900 border border-slate-800 text-slate-100 rounded-bl-sm'
@@ -300,15 +358,37 @@ const ChatWindow = ({ onBack }) => {
                         <span className="truncate italic">
                           {msg.replyTo.isDeleted
                             ? 'Deleted message'
-                            : msg.replyTo.content || 'Media message'}
+                            : msg.replyTo.content || (msg.replyTo.type === 'image' ? '📷 Image' : '')}
                         </span>
                       </div>
                     )}
 
-                    {/* Message Content */}
-                    <p className="whitespace-pre-wrap break-words">{msg.content}</p>
+                    {/* Image Attachment (if message type is image) */}
+                    {msg.mediaUrl && !msg.isDeleted && (
+                      <div className="mb-2 relative group/img cursor-pointer overflow-hidden rounded-2xl">
+                        <img
+                          src={msg.mediaUrl}
+                          alt="Attachment"
+                          onClick={() => setActiveLightboxUrl(msg.mediaUrl)}
+                          className="max-h-72 w-full object-cover rounded-2xl hover:scale-105 transition-transform duration-200 border border-black/20 shadow-md"
+                        />
+                        <div
+                          onClick={() => setActiveLightboxUrl(msg.mediaUrl)}
+                          className="absolute inset-0 bg-black/20 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center"
+                        >
+                          <span className="px-3 py-1 rounded-full bg-slate-900/80 text-white text-xs backdrop-blur-md">
+                            Click to expand
+                          </span>
+                        </div>
+                      </div>
+                    )}
 
-                    {/* Footer Info (Time, Read status, Edited status) */}
+                    {/* Text Content */}
+                    {msg.content && (
+                      <p className="whitespace-pre-wrap break-words">{msg.content}</p>
+                    )}
+
+                    {/* Footer Info */}
                     <div
                       className={`flex items-center justify-end gap-1.5 mt-1.5 text-[10px] ${
                         isMe ? 'text-indigo-200' : 'text-slate-400'
@@ -356,7 +436,8 @@ const ChatWindow = ({ onBack }) => {
               <>
                 <Reply className="w-4 h-4 text-indigo-400 flex-shrink-0" />
                 <span>
-                  Replying to <b className="text-white">{replyingTo.sender?.name}</b>: &quot;{replyingTo.content}&quot;
+                  Replying to <b className="text-white">{replyingTo.sender?.name}</b>:{' '}
+                  &quot;{replyingTo.content || 'Image message'}&quot;
                 </span>
               </>
             ) : (
@@ -395,6 +476,16 @@ const ChatWindow = ({ onBack }) => {
       {/* 5. Message Composer */}
       <footer className="p-3 sm:p-4 border-t border-slate-800/80 bg-slate-900/80 backdrop-blur-xl">
         <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+          {/* File Attachment Button */}
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="p-2.5 rounded-xl bg-slate-800 text-slate-400 hover:text-indigo-400 hover:bg-slate-700 transition-colors cursor-pointer"
+            title="Attach Image"
+          >
+            <Paperclip className="w-5 h-5" />
+          </button>
+
           {/* Emoji Toggle Button */}
           <button
             type="button"
@@ -437,6 +528,25 @@ const ChatWindow = ({ onBack }) => {
           </button>
         </form>
       </footer>
+
+      {/* 6. Image Preview Before Sending Modal */}
+      <ImagePreviewModal
+        isOpen={isImagePreviewOpen}
+        imageFile={selectedImageFile}
+        onClose={() => {
+          setIsImagePreviewOpen(false);
+          setSelectedImageFile(null);
+        }}
+        onSend={handleSendImageConfirm}
+        sending={uploadingImage}
+      />
+
+      {/* 7. Image Lightbox Modal */}
+      <ImageLightboxModal
+        isOpen={!!activeLightboxUrl}
+        imageUrl={activeLightboxUrl}
+        onClose={() => setActiveLightboxUrl(null)}
+      />
     </div>
   );
 };

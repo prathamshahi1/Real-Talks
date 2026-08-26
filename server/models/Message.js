@@ -58,8 +58,13 @@ const messageSchema = new mongoose.Schema(
   }
 );
 
-// Indexes for ultra-fast query performance when fetching chat history
+// 1. Compound Index for fast message history retrieval
 messageSchema.index({ conversationId: 1, createdAt: 1 });
+
+// 2. TTL (Time-To-Live) 24-Hour Auto-Delete Index
+// MongoDB's background thread automatically removes documents older than 24 hours (86,400 seconds)
+// to prevent exceeding free tier database storage limits!
+messageSchema.index({ createdAt: 1 }, { expireAfterSeconds: 86400, name: 'auto_delete_24h_ttl' });
 
 const Message = mongoose.model('Message', messageSchema);
 
