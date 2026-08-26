@@ -1,5 +1,5 @@
 {
-  "name": "realtime-chat-server",
+  "name": "real-talks-server",
   "version": "1.0.0",
   "description": "Production-ready Real-Time Chat Application Backend (MERN + Socket.IO)",
   "main": "server.js",
