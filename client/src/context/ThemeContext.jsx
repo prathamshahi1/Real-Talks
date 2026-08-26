@@ -11,10 +11,10 @@ export const ThemeProvider = ({ children }) => {
     const root = document.documentElement;
     if (theme === 'dark') {
       root.classList.add('dark');
-      root.classList.remove('light');
+      root.setAttribute('data-theme', 'dark');
     } else {
       root.classList.remove('dark');
-      root.classList.add('light');
+      root.setAttribute('data-theme', 'light');
     }
     localStorage.setItem('real_talks_theme', theme);
   }, [theme]);

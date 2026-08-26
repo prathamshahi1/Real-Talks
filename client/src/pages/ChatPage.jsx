@@ -14,7 +14,10 @@ import {
   Search,
   Users,
   Sun,
-  Moon
+  Moon,
+  Sparkles,
+  Flame,
+  Radio
 } from 'lucide-react';
 
 const ChatPage = () => {
@@ -35,39 +38,47 @@ const ChatPage = () => {
   };
 
   return (
-    <div className="h-screen w-screen bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col overflow-hidden select-none transition-colors">
-      {/* 1. Global Top Navigation Bar */}
-      <header className="h-16 border-b border-slate-200 dark:border-slate-800/80 bg-white/95 dark:bg-slate-900/90 backdrop-blur-xl flex items-center justify-between px-4 sm:px-6 z-20 flex-shrink-0 shadow-sm transition-colors">
-        {/* Brand Logo & Title */}
+    <div className="h-screen w-screen bg-emerald-50/50 dark:bg-[#020b08] text-slate-900 dark:text-emerald-50 flex flex-col overflow-hidden select-none transition-colors duration-300">
+      {/* 1. Ultra-Modern Top Navigation Bar */}
+      <header className="h-16 border-b border-emerald-200/80 dark:border-emerald-900/60 bg-white/90 dark:bg-[#041c14]/90 backdrop-blur-xl flex items-center justify-between px-4 sm:px-6 z-20 flex-shrink-0 shadow-md shadow-emerald-500/5 transition-colors">
+        {/* Brand Logo */}
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-600/20">
+          <div className="h-11 w-11 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-green-500 flex items-center justify-center text-white shadow-lg shadow-emerald-600/30 ring-2 ring-emerald-400/30">
             <MessageSquare className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="text-lg font-extrabold tracking-tight text-slate-900 dark:text-white">
-              Real Talks
-            </h1>
-            <p className="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium">Real-Time Messaging</p>
+            <div className="flex items-center gap-1.5">
+              <h1 className="text-lg font-black tracking-tight text-slate-900 dark:text-white">
+                Real <span className="bg-gradient-to-r from-emerald-600 to-teal-500 dark:from-emerald-400 dark:to-teal-300 bg-clip-text text-transparent">Talks</span>
+              </h1>
+              <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-[9px] font-extrabold text-emerald-800 dark:text-emerald-300">
+                PRO
+              </span>
+            </div>
+            <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              Live Real-Time Sockets
+            </p>
           </div>
         </div>
 
-        {/* Action Controls & User Pill */}
+        {/* Center/Right Action Controls */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Light / Dark Mode Toggle */}
+          {/* Light / Dark Mode Toggle Button */}
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition-all cursor-pointer flex items-center gap-1.5 text-xs font-semibold"
+            className="px-3.5 py-2 rounded-2xl bg-emerald-100/80 dark:bg-emerald-950/80 hover:bg-emerald-200 dark:hover:bg-emerald-900 text-emerald-900 dark:text-emerald-200 border border-emerald-300/80 dark:border-emerald-700/60 shadow-sm transition-all active:scale-95 cursor-pointer flex items-center gap-2 text-xs font-bold"
             title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
           >
             {isDark ? (
               <>
-                <Sun className="w-4 h-4 text-amber-400" />
-                <span className="hidden lg:inline text-xs">Light</span>
+                <Sun className="w-4 h-4 text-amber-400 animate-spin-slow" />
+                <span className="hidden md:inline">Light</span>
               </>
             ) : (
               <>
-                <Moon className="w-4 h-4 text-indigo-600" />
-                <span className="hidden lg:inline text-xs">Dark</span>
+                <Moon className="w-4 h-4 text-emerald-700" />
+                <span className="hidden md:inline">Dark</span>
               </>
             )}
           </button>
@@ -75,49 +86,50 @@ const ChatPage = () => {
           {/* New Group Button */}
           <button
             onClick={() => setIsCreateGroupOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-violet-50 dark:bg-violet-600/15 hover:bg-violet-100 dark:hover:bg-violet-600/25 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-500/30 text-xs font-semibold transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold shadow-md shadow-emerald-600/25 hover:shadow-emerald-600/35 transition-all active:scale-95 cursor-pointer"
           >
-            <Users className="w-4 h-4 text-violet-600 dark:text-violet-400" />
-            <span className="hidden md:inline">New Group</span>
+            <Users className="w-4 h-4" />
+            <span className="hidden sm:inline">New Group</span>
           </button>
 
           {/* Find Users Button */}
           <button
             onClick={() => setIsSearchOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs font-semibold transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-white dark:bg-emerald-950/60 hover:bg-emerald-50 dark:hover:bg-emerald-900/60 text-emerald-900 dark:text-emerald-200 border border-emerald-300/80 dark:border-emerald-700/60 text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-sm"
           >
-            <Search className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-            <span className="hidden md:inline">Find Users</span>
+            <Search className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <span className="hidden sm:inline">Find Users</span>
           </button>
 
           {/* Settings Trigger */}
           <button
             onClick={() => setIsProfileOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs font-semibold transition-all cursor-pointer"
+            className="p-2 sm:px-3 sm:py-2 rounded-2xl bg-white dark:bg-emerald-950/60 hover:bg-emerald-50 dark:hover:bg-emerald-900/60 text-emerald-900 dark:text-emerald-200 border border-emerald-300/80 dark:border-emerald-700/60 text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-sm flex items-center gap-1.5"
+            title="Profile & Settings"
           >
-            <Settings className="w-4 h-4 text-slate-500" />
-            <span className="hidden md:inline">Settings</span>
+            <Settings className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <span className="hidden lg:inline">Settings</span>
           </button>
 
           {/* User Profile Pill */}
           <div
             onClick={() => setIsProfileOpen(true)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 cursor-pointer hover:border-indigo-500 transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-emerald-100/70 dark:bg-[#06241a] border border-emerald-300/80 dark:border-emerald-700/80 cursor-pointer hover:border-emerald-500 transition-all shadow-sm"
           >
             <img
               src={user?.avatar}
               alt={user?.name}
-              className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 object-cover"
+              className="w-6 h-6 rounded-xl bg-white dark:bg-emerald-900 object-cover ring-1 ring-emerald-400"
             />
-            <span className="hidden sm:inline text-xs font-semibold text-slate-700 dark:text-slate-200">
+            <span className="hidden xl:inline text-xs font-bold text-emerald-950 dark:text-emerald-100">
               @{user?.username}
             </span>
           </div>
 
-          {/* Prominent Sign Out Button */}
+          {/* Dedicated Prominent Sign Out Button */}
           <button
             onClick={logout}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30 text-xs font-bold transition-all cursor-pointer shadow-sm"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white text-xs font-bold transition-all shadow-md shadow-rose-600/25 active:scale-95 cursor-pointer"
             title="Sign out of Real Talks"
           >
             <LogOut className="w-4 h-4" />
@@ -126,7 +138,7 @@ const ChatPage = () => {
         </div>
       </header>
 
-      {/* 2. Main Workspace Layout */}
+      {/* 2. Main Chat Workspace */}
       <main className="flex-1 flex overflow-hidden relative">
         <div
           className={`w-full md:w-auto h-full flex-shrink-0 ${
