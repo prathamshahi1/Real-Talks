@@ -5,7 +5,7 @@ import axios from 'axios';
  * Sets base URL and enables credentials (cookies) for all requests
  */
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5050/api',
   withCredentials: true, // Crucial for sending/receiving HTTP-only cookies
   headers: {
     'Content-Type': 'application/json',
