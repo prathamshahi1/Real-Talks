@@ -109,6 +109,13 @@ export const setupSocket = (io) => {
       }
     });
 
+    // 8. Conversation Delete Broadcast
+    socket.on('delete_conversation', ({ conversationId }) => {
+      if (conversationId) {
+        socket.to(conversationId).emit('conversation_deleted', { conversationId });
+      }
+    });
+
     // 8. Handle Disconnection
     socket.on('disconnect', async () => {
       if (userId && userId !== 'undefined') {

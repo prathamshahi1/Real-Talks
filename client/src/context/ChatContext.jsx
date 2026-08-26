@@ -5,6 +5,15 @@ import { useAuth } from './AuthContext';
 
 const ChatContext = createContext(null);
 
+export const getUnreadCount = (conversation, userId) => {
+  if (!conversation || !conversation.unreadCounts || !userId) return 0;
+  const uIdStr = (userId._id || userId).toString();
+  if (conversation.unreadCounts instanceof Map) {
+    return conversation.unreadCounts.get(uIdStr) || 0;
+  }
+  return conversation.unreadCounts[uIdStr] || 0;
+};
+
 export const ChatProvider = ({ children }) => {
   const { user } = useAuth();
 
@@ -12,7 +21,7 @@ export const ChatProvider = ({ children }) => {
   const [activeConversation, setActiveConversation] = useState(null);
   const [messages, setMessages] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState(new Set());
-  const [typingUsers, setTypingUsers] = useState({}); // { [conversationId]: [username1, username2] }
+  const [typingUsers, setTypingUsers] = useState({});
   const [loadingConversations, setLoadingConversations] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [replyingTo, setReplyingTo] = useState(null);
@@ -39,12 +48,36 @@ export const ChatProvider = ({ children }) => {
 
   // 2. Select & Load Active Conversation
   const selectConversation = useCallback(async (conversation) => {
-    if (!conversation) return;
+    if (!conversation) {
+      setActiveConversation(null);
+      setMessages([]);
+      return;
+    }
+
     setActiveConversation(conversation);
     setReplyingTo(null);
     setEditingMessage(null);
 
-    // Leave previous room and join new one
+    // Instantly zero-out local unread badge
+    const userIdStr = user?._id?.toString();
+    setConversations((prev) =>
+      prev.map((c) => {
+        if (c._id === conversation._id) {
+          const updated = { ...c };
+          if (updated.unreadCounts) {
+            if (updated.unreadCounts instanceof Map) {
+              updated.unreadCounts.set(userIdStr, 0);
+            } else {
+              updated.unreadCounts = { ...updated.unreadCounts, [userIdStr]: 0 };
+            }
+          }
+          return updated;
+        }
+        return c;
+      })
+    );
+
+    // Join room
     socket.emit('join_conversation', conversation._id);
 
     try {
@@ -54,26 +87,12 @@ export const ChatProvider = ({ children }) => {
         setMessages(res.data.messages || []);
       }
 
-      // Mark messages as read on server
+      // Mark messages as read on backend server
       await api.post(`/messages/${conversation._id}/read`);
       socket.emit('mark_read', {
         conversationId: conversation._id,
         readerId: user?._id,
       });
-
-      // Reset local unread badge for this conversation
-      setConversations((prev) =>
-        prev.map((c) => {
-          if (c._id === conversation._id && c.unreadCounts) {
-            const copy = { ...c };
-            if (copy.unreadCounts instanceof Map) {
-              copy.unreadCounts.set(user._id.toString(), 0);
-            }
-            return copy;
-          }
-          return c;
-        })
-      );
     } catch (err) {
       console.error('Error loading messages:', err);
     } finally {
@@ -81,7 +100,7 @@ export const ChatProvider = ({ children }) => {
     }
   }, [user]);
 
-  // 3. Start or Get Private Conversation with User
+  // 3. Start or Get Private Conversation
   const startConversationWithUser = async (targetUser) => {
     try {
       const res = await api.post('/conversations/private', {
@@ -121,14 +140,11 @@ export const ChatProvider = ({ children }) => {
       if (res.data.success) {
         const savedMessage = res.data.message;
 
-        // Append to local message feed
         setMessages((prev) => [...prev, savedMessage]);
         setReplyingTo(null);
 
-        // Emit real-time message via socket
         socket.emit('send_message', savedMessage);
 
-        // Update conversation list lastMessage
         setConversations((prev) =>
           prev.map((c) =>
             c._id === activeConversation._id
@@ -145,7 +161,7 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
-  // Send Image Message (Upload + Message Dispatch)
+  // Send Image Message
   const sendImageMessage = async ({ file, caption, replyTo }) => {
     if (!activeConversation || !file) return;
 
@@ -153,7 +169,6 @@ export const ChatProvider = ({ children }) => {
       const formData = new FormData();
       formData.append('image', file);
 
-      // Upload file to server/Cloudinary
       const uploadRes = await api.post('/upload/image', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
@@ -216,7 +231,26 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
-  // 7. Typing Emitter
+  // 7. Delete Full Conversation
+  const deleteConversation = async (conversationId) => {
+    try {
+      const res = await api.delete(`/conversations/${conversationId}`);
+      if (res.data.success) {
+        setConversations((prev) => prev.filter((c) => c._id !== conversationId));
+        if (activeConversationRef.current?._id === conversationId) {
+          setActiveConversation(null);
+          setMessages([]);
+        }
+
+        socket.emit('delete_conversation', { conversationId });
+      }
+    } catch (err) {
+      console.error('Delete conversation error:', err);
+      throw err;
+    }
+  };
+
+  // 8. Typing Emitter
   const emitTyping = (isTyping) => {
     if (!activeConversation || !user) return;
     const eventName = isTyping ? 'typing_start' : 'typing_stop';
@@ -227,7 +261,7 @@ export const ChatProvider = ({ children }) => {
     });
   };
 
-  // 8. Group Actions
+  // 9. Group Actions
   const createGroup = async (groupData) => {
     try {
       const res = await api.post('/groups', groupData);
@@ -312,11 +346,10 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
-  // 8. Setup Global Socket Listeners
+  // 10. Global Socket Listeners
   useEffect(() => {
     if (!user) return;
 
-    // Connect socket with userId query parameter
     socket.io.opts.query = { userId: user._id };
     if (!socket.connected) {
       socket.connect();
@@ -326,7 +359,6 @@ export const ChatProvider = ({ children }) => {
 
     fetchConversations();
 
-    // Listener: Online users list
     const onOnlineUsers = (usersList) => {
       setOnlineUsers(new Set(usersList));
     };
@@ -343,18 +375,18 @@ export const ChatProvider = ({ children }) => {
       });
     };
 
-    // Listener: Incoming Real-Time Message
+    // Incoming Real-Time Message
     const onReceiveMessage = (incomingMessage) => {
       const currentActive = activeConversationRef.current;
+      const myUserId = user?._id?.toString();
 
       if (currentActive && currentActive._id === incomingMessage.conversationId) {
         setMessages((prev) => {
-          // Avoid duplicate messages
           if (prev.some((m) => m._id === incomingMessage._id)) return prev;
           return [...prev, incomingMessage];
         });
 
-        // Mark as read immediately if user has the conversation open
+        // Mark as read immediately on backend & socket
         api.post(`/messages/${incomingMessage.conversationId}/read`);
         socket.emit('mark_read', {
           conversationId: incomingMessage.conversationId,
@@ -362,30 +394,45 @@ export const ChatProvider = ({ children }) => {
         });
       }
 
-      // Update conversations list with latest message
+      // Update conversations list & unread count
       setConversations((prev) => {
-        const existingConv = prev.find((c) => c._id === incomingMessage.conversationId);
-        if (existingConv) {
+        const isCurrentOpen = currentActive?._id === incomingMessage.conversationId;
+        const exists = prev.find((c) => c._id === incomingMessage.conversationId);
+
+        if (exists) {
           return prev
-            .map((c) =>
-              c._id === incomingMessage.conversationId
-                ? {
-                    ...c,
-                    lastMessage: incomingMessage,
-                    updatedAt: incomingMessage.createdAt || new Date().toISOString(),
+            .map((c) => {
+              if (c._id === incomingMessage.conversationId) {
+                const updated = {
+                  ...c,
+                  lastMessage: incomingMessage,
+                  updatedAt: incomingMessage.createdAt || new Date().toISOString(),
+                };
+
+                // Increment unread count only if not currently looking at this conversation
+                if (!isCurrentOpen && myUserId) {
+                  const currentCount = getUnreadCount(c, myUserId);
+                  if (updated.unreadCounts instanceof Map) {
+                    updated.unreadCounts.set(myUserId, currentCount + 1);
+                  } else {
+                    updated.unreadCounts = {
+                      ...updated.unreadCounts,
+                      [myUserId]: currentCount + 1,
+                    };
                   }
-                : c
-            )
+                }
+                return updated;
+              }
+              return c;
+            })
             .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
         } else {
-          // If conversation is brand new, refresh list
           fetchConversations();
           return prev;
         }
       });
     };
 
-    // Listener: Typing indicator
     const onTypingStart = ({ conversationId, username, userId: typingId }) => {
       if (typingId === user._id) return;
       setTypingUsers((prev) => ({
@@ -401,7 +448,6 @@ export const ChatProvider = ({ children }) => {
       }));
     };
 
-    // Listener: Message Read Status
     const onMessageRead = ({ conversationId }) => {
       if (activeConversationRef.current?._id === conversationId) {
         setMessages((prev) =>
@@ -410,14 +456,12 @@ export const ChatProvider = ({ children }) => {
       }
     };
 
-    // Listener: Message Edited
     const onMessageEdited = (updatedMsg) => {
       setMessages((prev) =>
         prev.map((m) => (m._id === updatedMsg._id ? updatedMsg : m))
       );
     };
 
-    // Listener: Message Deleted
     const onMessageDeleted = ({ messageId }) => {
       setMessages((prev) =>
         prev.map((m) =>
@@ -426,6 +470,14 @@ export const ChatProvider = ({ children }) => {
             : m
         )
       );
+    };
+
+    const onConversationDeleted = ({ conversationId }) => {
+      setConversations((prev) => prev.filter((c) => c._id !== conversationId));
+      if (activeConversationRef.current?._id === conversationId) {
+        setActiveConversation(null);
+        setMessages([]);
+      }
     };
 
     socket.on('get_online_users', onOnlineUsers);
@@ -437,6 +489,7 @@ export const ChatProvider = ({ children }) => {
     socket.on('message_read', onMessageRead);
     socket.on('message_edited', onMessageEdited);
     socket.on('message_deleted', onMessageDeleted);
+    socket.on('conversation_deleted', onConversationDeleted);
 
     return () => {
       socket.off('get_online_users', onOnlineUsers);
@@ -448,6 +501,7 @@ export const ChatProvider = ({ children }) => {
       socket.off('message_read', onMessageRead);
       socket.off('message_edited', onMessageEdited);
       socket.off('message_deleted', onMessageDeleted);
+      socket.off('conversation_deleted', onConversationDeleted);
     };
   }, [user, fetchConversations]);
 
@@ -472,6 +526,7 @@ export const ChatProvider = ({ children }) => {
         sendImageMessage,
         editMessage,
         deleteMessage,
+        deleteConversation,
         emitTyping,
         createGroup,
         addMembersToGroup,
