@@ -85,8 +85,8 @@ const ChatSidebar = ({ onOpenSearch, onOpenCreateGroup }) => {
 
   return (
     <aside className="w-full md:w-80 lg:w-96 flex-shrink-0 flex flex-col bg-white/95 dark:bg-[#041911]/95 border-r border-emerald-200/80 dark:border-emerald-900/60 h-full transition-colors duration-300">
-      {/* Sidebar Top Header */}
-      <div className="p-3.5 sm:p-4 border-b border-emerald-100 dark:border-emerald-900/50 flex items-center justify-between">
+      {/* Sidebar Top Header (Shown on Tablet & Desktop) */}
+      <div className="hidden md:flex p-3.5 sm:p-4 border-b border-emerald-100 dark:border-emerald-900/50 items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-emerald-600/30">
             <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -168,7 +168,7 @@ const ChatSidebar = ({ onOpenSearch, onOpenCreateGroup }) => {
       </div>
 
       {/* Conversations List */}
-      <div className="flex-1 overflow-y-auto p-2 space-y-1.5 overscroll-contain">
+      <div className="flex-1 overflow-y-auto p-2 space-y-1.5 overscroll-contain pb-safe">
         {loadingConversations ? (
           <div className="flex flex-col items-center justify-center py-16 text-emerald-600 dark:text-emerald-400 text-xs gap-2">
             <Loader2 className="w-6 h-6 animate-spin" />

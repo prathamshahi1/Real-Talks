@@ -230,7 +230,7 @@ const ChatWindow = ({ onBack }) => {
       />
 
       {/* 1. Chat Header */}
-      <header className="p-3 sm:p-4 border-b border-emerald-200/80 dark:border-emerald-900/60 bg-white/95 dark:bg-[#041d15]/90 backdrop-blur-xl flex items-center justify-between z-10 shadow-sm transition-colors min-h-[60px]">
+      <header className="pt-safe p-3 sm:p-4 border-b border-emerald-200/80 dark:border-emerald-900/60 bg-white/95 dark:bg-[#041d15]/90 backdrop-blur-xl flex items-center justify-between z-10 shadow-sm transition-colors min-h-[56px] sm:min-h-[64px]">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
           {onBack && (
             <button
@@ -606,7 +606,7 @@ const ChatWindow = ({ onBack }) => {
       )}
 
       {/* 5. Floating Message Composer */}
-      <footer className="p-2 sm:p-4 border-t border-emerald-200/80 dark:border-emerald-900/60 bg-white/95 dark:bg-[#041d15]/95 backdrop-blur-xl">
+      <footer className="pb-safe p-2 sm:p-4 border-t border-emerald-200/80 dark:border-emerald-900/60 bg-white/95 dark:bg-[#041d15]/95 backdrop-blur-xl flex-shrink-0">
         <form onSubmit={handleSendMessage} className="flex items-center gap-1.5 sm:gap-2 max-w-5xl mx-auto">
           <button
             type="button"

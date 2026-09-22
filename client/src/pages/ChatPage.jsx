@@ -39,9 +39,13 @@ const ChatPage = () => {
   };
 
   return (
-    <div className="h-[100dvh] w-full min-h-[100dvh] bg-emerald-50/50 dark:bg-[#020b08] text-slate-900 dark:text-emerald-50 flex flex-col overflow-hidden select-none transition-colors duration-300">
+    <div className="h-full w-full bg-emerald-50/50 dark:bg-[#020b08] text-slate-900 dark:text-emerald-50 flex flex-col overflow-hidden select-none transition-colors duration-300">
       {/* 1. Ultra-Modern Responsive Top Navigation Bar */}
-      <header className="h-14 sm:h-16 border-b border-emerald-200/80 dark:border-emerald-900/60 bg-white/95 dark:bg-[#041c14]/95 backdrop-blur-xl flex items-center justify-between px-3 sm:px-6 z-20 flex-shrink-0 shadow-md shadow-emerald-500/5 transition-colors">
+      <header
+        className={`pt-safe border-b border-emerald-200/80 dark:border-emerald-900/60 bg-white/95 dark:bg-[#041c14]/95 backdrop-blur-xl items-center justify-between px-3 sm:px-6 z-20 flex-shrink-0 shadow-sm transition-colors ${
+          activeConversation ? 'hidden md:flex h-14 sm:h-16' : 'flex h-14 sm:h-16'
+        }`}
+      >
         {/* Brand Logo */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <div className="h-9 w-9 sm:h-11 sm:w-11 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-green-500 flex items-center justify-center text-white shadow-md shadow-emerald-600/30 ring-2 ring-emerald-400/30 flex-shrink-0">

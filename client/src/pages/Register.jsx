@@ -84,7 +84,7 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50/50 to-green-100/70 dark:from-[#020b08] dark:via-[#041d14] dark:to-[#02140d] text-slate-900 dark:text-emerald-50 flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 py-12 relative overflow-hidden transition-all duration-300">
+    <div className="h-full w-full bg-gradient-to-br from-emerald-50 via-teal-50/50 to-green-100/70 dark:from-[#020b08] dark:via-[#041d14] dark:to-[#02140d] text-slate-900 dark:text-emerald-50 flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 py-8 pt-safe pb-safe relative overflow-y-auto overscroll-contain transition-all duration-300">
       {/* Radiant Glowing Orbs */}
       <div className="absolute top-10 right-10 w-96 h-96 bg-gradient-to-tr from-emerald-400/30 to-teal-300/30 dark:from-emerald-500/20 dark:to-teal-400/10 rounded-full blur-3xl pointer-events-none animate-pulse-subtle"></div>
       <div className="absolute bottom-10 left-10 w-[30rem] h-[30rem] bg-gradient-to-br from-green-400/25 via-emerald-300/20 to-teal-400/30 dark:from-emerald-600/15 dark:to-green-500/10 rounded-full blur-3xl pointer-events-none animate-float"></div>
