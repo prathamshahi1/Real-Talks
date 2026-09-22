@@ -66,6 +66,8 @@ const ChatWindow = ({ onBack }) => {
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
+  const [selectedMsgForActions, setSelectedMsgForActions] = useState(null);
+
   const isGroup = activeConversation?.type === 'group';
 
   const otherParticipant = isGroup
@@ -205,12 +207,12 @@ const ChatWindow = ({ onBack }) => {
 
   if (!activeConversation) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-8 bg-emerald-50/30 dark:bg-[#020d09]/50 text-center transition-colors duration-300">
-        <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-emerald-500/20 via-teal-500/20 to-green-500/20 border-2 border-emerald-400/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-5 shadow-xl shadow-emerald-600/10 animate-float">
-          <MessageSquare className="w-10 h-10" />
+      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-8 bg-emerald-50/30 dark:bg-[#020d09]/50 text-center transition-colors duration-300">
+        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-tr from-emerald-500/20 via-teal-500/20 to-green-500/20 border-2 border-emerald-400/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-4 sm:mb-5 shadow-xl shadow-emerald-600/10 animate-float">
+          <MessageSquare className="w-8 h-8 sm:w-10 sm:h-10" />
         </div>
-        <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2">Welcome to Real Talks</h3>
-        <p className="text-sm text-slate-600 dark:text-emerald-300/80 max-w-sm font-medium">
+        <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mb-2">Welcome to Real Talks</h3>
+        <p className="text-xs sm:text-sm text-slate-600 dark:text-emerald-300/80 max-w-sm font-medium">
           Select a chat or group from the sidebar to begin real-time messaging, photo sharing, and team collaboration!
         </p>
       </div>
@@ -228,46 +230,47 @@ const ChatWindow = ({ onBack }) => {
       />
 
       {/* 1. Chat Header */}
-      <header className="p-4 border-b border-emerald-200/80 dark:border-emerald-900/60 bg-white/95 dark:bg-[#041d15]/90 backdrop-blur-xl flex items-center justify-between z-10 shadow-sm transition-colors">
-        <div className="flex items-center gap-3">
+      <header className="p-3 sm:p-4 border-b border-emerald-200/80 dark:border-emerald-900/60 bg-white/95 dark:bg-[#041d15]/90 backdrop-blur-xl flex items-center justify-between z-10 shadow-sm transition-colors min-h-[60px]">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
           {onBack && (
             <button
               onClick={onBack}
-              className="md:hidden p-2 rounded-xl text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900 transition-colors"
+              className="md:hidden p-2 rounded-xl text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900 transition-colors flex-shrink-0 cursor-pointer active:scale-95"
+              aria-label="Back to conversations list"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
           )}
 
           <div
-            className="relative cursor-pointer"
+            className="relative cursor-pointer flex-shrink-0"
             onClick={() => isGroup && setIsGroupInfoOpen(true)}
           >
             <img
               src={avatarUrl}
               alt={displayName}
-              className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-950 object-cover border-2 border-emerald-300 dark:border-emerald-700 shadow-sm"
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-950 object-cover border-2 border-emerald-300 dark:border-emerald-700 shadow-sm"
             />
             {isGroup ? (
               <span className="absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded-md bg-teal-600 text-[9px] font-bold text-white shadow-sm flex items-center gap-0.5 ring-2 ring-white dark:ring-[#041d15]">
                 <Users className="w-2.5 h-2.5" />
               </span>
             ) : isOnline ? (
-              <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-[#041d15] shadow-sm shadow-emerald-500/50"></span>
+              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-[#041d15] shadow-sm shadow-emerald-500/50"></span>
             ) : (
-              <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-slate-400 dark:bg-emerald-900 border-2 border-white dark:border-[#041d15]"></span>
+              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-slate-400 dark:bg-emerald-900 border-2 border-white dark:border-[#041d15]"></span>
             )}
           </div>
 
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="font-extrabold text-slate-900 dark:text-white text-base leading-tight">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <h3 className="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base leading-tight truncate">
                 {displayName || 'Chat Room'}
               </h3>
               {isGroup && (
                 <button
                   onClick={() => setIsGroupInfoOpen(true)}
-                  className="p-1 rounded-lg text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 cursor-pointer"
+                  className="p-1 rounded-lg text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 cursor-pointer flex-shrink-0"
                   title="Group Details"
                 >
                   <Info className="w-3.5 h-3.5" />
@@ -275,24 +278,24 @@ const ChatWindow = ({ onBack }) => {
               )}
             </div>
 
-            <div className="flex items-center gap-1.5 text-xs mt-0.5">
+            <div className="flex items-center gap-1.5 text-[11px] sm:text-xs mt-0.5 truncate">
               {isOtherTyping ? (
-                <span className="text-emerald-700 dark:text-emerald-400 font-bold animate-pulse flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-                  {currentTypingList.join(', ')} typing...
+                <span className="text-emerald-700 dark:text-emerald-400 font-bold animate-pulse flex items-center gap-1 truncate">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping flex-shrink-0"></span>
+                  <span className="truncate">{currentTypingList.join(', ')} typing...</span>
                 </span>
               ) : isGroup ? (
-                <span className="text-teal-700 dark:text-teal-400 font-semibold flex items-center gap-1">
-                  <Users className="w-3 h-3" />
-                  {activeConversation.participants?.length || 0} members
+                <span className="text-teal-700 dark:text-teal-400 font-semibold flex items-center gap-1 truncate">
+                  <Users className="w-3 h-3 flex-shrink-0" />
+                  <span>{activeConversation.participants?.length || 0} members</span>
                 </span>
               ) : isOnline ? (
-                <span className="text-emerald-700 dark:text-emerald-400 font-bold flex items-center gap-1">
-                  <Radio className="w-3 h-3 animate-pulse" />
-                  Active Online
+                <span className="text-emerald-700 dark:text-emerald-400 font-bold flex items-center gap-1 truncate">
+                  <Radio className="w-3 h-3 animate-pulse flex-shrink-0" />
+                  <span>Active Online</span>
                 </span>
               ) : (
-                <span className="text-slate-400 dark:text-emerald-500/70 font-medium">
+                <span className="text-slate-400 dark:text-emerald-500/70 font-medium truncate">
                   {otherParticipant?.lastSeen && otherParticipant.privacy?.showLastSeen !== false
                     ? `Last seen ${new Date(otherParticipant.lastSeen).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
                     : 'Offline'}
@@ -303,20 +306,20 @@ const ChatWindow = ({ onBack }) => {
         </div>
 
         {/* Right Header Controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <div
-            className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/15 to-orange-500/15 border border-amber-400/40 text-amber-800 dark:text-amber-300 text-[11px] font-bold shadow-sm"
-            title="MongoDB 24-hour TTL index active"
+            className="hidden xl:flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-emerald-500/15 to-teal-500/15 border border-emerald-400/40 text-emerald-800 dark:text-emerald-300 text-[11px] font-bold shadow-sm"
+            title="Real-Time Persistent Chat & History"
           >
-            <Flame className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
-            <span>24h Auto-Clean Active</span>
+            <Sparkles className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
+            <span>Real-Time Synchronized</span>
           </div>
 
           {/* Options Dropdown Menu */}
           <div className="relative">
             <button
               onClick={() => setShowMenu(!showMenu)}
-              className="p-2.5 rounded-xl text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-colors cursor-pointer border border-emerald-200/60 dark:border-emerald-800/60 shadow-sm"
+              className="p-2 sm:p-2.5 rounded-xl text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-colors cursor-pointer border border-emerald-200/60 dark:border-emerald-800/60 shadow-sm active:scale-95"
             >
               <MoreVertical className="w-4 h-4" />
             </button>
@@ -329,7 +332,7 @@ const ChatWindow = ({ onBack }) => {
                       setShowMenu(false);
                       setIsGroupInfoOpen(true);
                     }}
-                    className="w-full px-4 py-2.5 text-left text-xs font-bold text-slate-800 dark:text-emerald-200 hover:bg-emerald-50 dark:hover:bg-emerald-900/40 flex items-center gap-2.5"
+                    className="w-full px-4 py-2.5 text-left text-xs font-bold text-slate-800 dark:text-emerald-200 hover:bg-emerald-50 dark:hover:bg-emerald-900/40 flex items-center gap-2.5 cursor-pointer"
                   >
                     <Info className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                     Group Information
@@ -338,7 +341,7 @@ const ChatWindow = ({ onBack }) => {
 
                 <button
                   onClick={handleDeleteCurrentChat}
-                  className="w-full px-4 py-2.5 text-left text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 flex items-center gap-2.5"
+                  className="w-full px-4 py-2.5 text-left text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 flex items-center gap-2.5 cursor-pointer"
                 >
                   <Trash2 className="w-4 h-4" />
                   Delete & Clear Chat
@@ -350,7 +353,10 @@ const ChatWindow = ({ onBack }) => {
       </header>
 
       {/* 2. Message History Feed */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+      <div
+        className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-3 sm:space-y-4 overscroll-contain"
+        onClick={() => setSelectedMsgForActions(null)}
+      >
         {loadingMessages ? (
           <div className="flex flex-col items-center justify-center py-24 text-emerald-600 dark:text-emerald-400 text-xs gap-2">
             <Loader2 className="w-7 h-7 animate-spin" />
@@ -370,6 +376,7 @@ const ChatWindow = ({ onBack }) => {
           messages.map((msg) => {
             const isMe = msg.sender === user?._id || msg.sender?._id === user?._id;
             const senderName = msg.sender?.name || 'Member';
+            const isActionsActive = selectedMsgForActions === msg._id;
 
             return (
               <div
@@ -382,24 +389,31 @@ const ChatWindow = ({ onBack }) => {
                   </span>
                 )}
 
-                <div className="relative max-w-[85%] sm:max-w-[70%]">
-                  {/* Action Toolbar on Hover */}
+                <div className="relative max-w-[88%] sm:max-w-[75%] md:max-w-[70%]">
+                  {/* Action Toolbar on Hover & Tap */}
                   <div
                     className={`absolute -top-4 ${
                       isMe ? 'right-2' : 'left-2'
-                    } hidden group-hover:flex items-center gap-1 p-1 rounded-xl bg-white dark:bg-[#06241a] border border-emerald-300 dark:border-emerald-700 shadow-xl z-10 animate-fade-in`}
+                    } ${isActionsActive ? 'flex' : 'hidden group-hover:flex'} items-center gap-1 p-1 rounded-xl bg-white dark:bg-[#06241a] border border-emerald-300 dark:border-emerald-700 shadow-xl z-20 animate-fade-in`}
+                    onClick={(e) => e.stopPropagation()}
                   >
                     <button
-                      onClick={() => setReplyingTo(msg)}
+                      onClick={() => {
+                        setReplyingTo(msg);
+                        setSelectedMsgForActions(null);
+                      }}
                       title="Reply"
-                      className="p-1.5 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-slate-600 dark:text-emerald-300 transition-colors"
+                      className="p-1.5 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-slate-600 dark:text-emerald-300 transition-colors cursor-pointer"
                     >
                       <Reply className="w-3.5 h-3.5" />
                     </button>
                     <button
-                      onClick={() => handleCopy(msg.content || msg.mediaUrl, msg._id)}
+                      onClick={() => {
+                        handleCopy(msg.content || msg.mediaUrl, msg._id);
+                        setSelectedMsgForActions(null);
+                      }}
                       title="Copy"
-                      className="p-1.5 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-slate-600 dark:text-emerald-300 transition-colors"
+                      className="p-1.5 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-slate-600 dark:text-emerald-300 transition-colors cursor-pointer"
                     >
                       {copiedId === msg._id ? (
                         <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
@@ -411,17 +425,23 @@ const ChatWindow = ({ onBack }) => {
                       <>
                         {!msg.mediaUrl && (
                           <button
-                            onClick={() => setEditingMessage(msg)}
+                            onClick={() => {
+                              setEditingMessage(msg);
+                              setSelectedMsgForActions(null);
+                            }}
                             title="Edit"
-                            className="p-1.5 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-slate-600 dark:text-emerald-300 transition-colors"
+                            className="p-1.5 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-slate-600 dark:text-emerald-300 transition-colors cursor-pointer"
                           >
                             <Edit2 className="w-3.5 h-3.5" />
                           </button>
                         )}
                         <button
-                          onClick={() => deleteMessage(msg._id)}
+                          onClick={() => {
+                            deleteMessage(msg._id);
+                            setSelectedMsgForActions(null);
+                          }}
                           title="Delete"
-                          className="p-1.5 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-950/60 text-rose-600 dark:text-rose-400 transition-colors"
+                          className="p-1.5 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-950/60 text-rose-600 dark:text-rose-400 transition-colors cursor-pointer"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -431,7 +451,11 @@ const ChatWindow = ({ onBack }) => {
 
                   {/* Message Bubble Card */}
                   <div
-                    className={`p-4 rounded-3xl text-sm leading-relaxed shadow-md overflow-hidden ${
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedMsgForActions(isActionsActive ? null : msg._id);
+                    }}
+                    className={`p-3.5 sm:p-4 rounded-3xl text-sm leading-relaxed shadow-md overflow-hidden transition-all ${
                       isMe
                         ? 'bg-gradient-to-tr from-emerald-600 via-teal-600 to-green-600 text-white rounded-br-sm shadow-emerald-600/20'
                         : 'bg-white dark:bg-[#05261b] border-2 border-emerald-200/80 dark:border-emerald-800/70 text-slate-900 dark:text-emerald-50 rounded-bl-sm shadow-sm'
@@ -440,7 +464,7 @@ const ChatWindow = ({ onBack }) => {
                     {/* Reply Quote */}
                     {msg.replyTo && (
                       <div
-                        className={`mb-2 p-2.5 rounded-2xl text-xs border-l-4 flex flex-col ${
+                        className={`mb-2 p-2 sm:p-2.5 rounded-2xl text-xs border-l-4 flex flex-col ${
                           isMe
                             ? 'bg-emerald-700/60 border-white text-emerald-50'
                             : 'bg-emerald-50 dark:bg-[#02140d] border-emerald-500 text-slate-700 dark:text-emerald-300'
@@ -463,8 +487,11 @@ const ChatWindow = ({ onBack }) => {
                         <img
                           src={msg.mediaUrl}
                           alt="Attachment"
-                          onClick={() => setActiveLightboxUrl(msg.mediaUrl)}
-                          className="max-h-72 w-full object-cover rounded-2xl hover:scale-105 transition-transform duration-200 border-2 border-white/20 dark:border-black/20 shadow-md"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveLightboxUrl(msg.mediaUrl);
+                          }}
+                          className="max-h-60 sm:max-h-72 w-full object-cover rounded-2xl hover:scale-105 transition-transform duration-200 border-2 border-white/20 dark:border-black/20 shadow-md"
                         />
                       </div>
                     )}
@@ -476,7 +503,7 @@ const ChatWindow = ({ onBack }) => {
 
                     {/* Footer Info */}
                     <div
-                      className={`flex items-center justify-end gap-1.5 mt-2 text-[10px] font-semibold ${
+                      className={`flex items-center justify-end gap-1.5 mt-1.5 text-[10px] font-semibold ${
                         isMe ? 'text-emerald-100' : 'text-slate-400 dark:text-emerald-400/60'
                       }`}
                     >
@@ -502,7 +529,7 @@ const ChatWindow = ({ onBack }) => {
         {/* Live Typing Bubbles */}
         {isOtherTyping && (
           <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 text-xs py-1">
-            <div className="p-3 rounded-2xl bg-white dark:bg-[#05261b] border-2 border-emerald-300 dark:border-emerald-700 flex items-center gap-1.5 shadow-sm">
+            <div className="p-2.5 sm:p-3 rounded-2xl bg-white dark:bg-[#05261b] border-2 border-emerald-300 dark:border-emerald-700 flex items-center gap-1.5 shadow-sm">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce"></span>
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce [animation-delay:0.2s]"></span>
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce [animation-delay:0.4s]"></span>
@@ -518,12 +545,12 @@ const ChatWindow = ({ onBack }) => {
 
       {/* 3. Reply / Edit Banner */}
       {(replyingTo || editingMessage) && (
-        <div className="px-4 py-2.5 bg-emerald-100/90 dark:bg-[#05261b] border-t-2 border-emerald-300 dark:border-emerald-700 flex items-center justify-between text-xs animate-slide-up">
-          <div className="flex items-center gap-2 truncate text-slate-800 dark:text-emerald-200 font-medium">
+        <div className="px-3 sm:px-4 py-2 sm:py-2.5 bg-emerald-100/95 dark:bg-[#05261b] border-t-2 border-emerald-300 dark:border-emerald-700 flex items-center justify-between text-xs animate-slide-up">
+          <div className="flex items-center gap-2 truncate text-slate-800 dark:text-emerald-200 font-medium min-w-0 pr-2">
             {replyingTo ? (
               <>
                 <Reply className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
-                <span>
+                <span className="truncate">
                   Replying to <b className="text-emerald-900 dark:text-white font-bold">{replyingTo.sender?.name}</b>:{' '}
                   &quot;{replyingTo.content || 'Image'}&quot;
                 </span>
@@ -541,48 +568,65 @@ const ChatWindow = ({ onBack }) => {
               setEditingMessage(null);
               setInputContent('');
             }}
-            className="p-1.5 rounded-lg text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-900/60"
+            className="p-1.5 rounded-lg text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-900/60 cursor-pointer flex-shrink-0"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
       )}
 
-      {/* 4. Emoji Picker Popup */}
+      {/* 4. Responsive Emoji Picker Modal / Popup */}
       {showEmojiPicker && (
-        <div className="absolute bottom-20 right-6 z-50 shadow-2xl rounded-3xl border-2 border-emerald-300 dark:border-emerald-700 overflow-hidden">
-          <EmojiPicker
-            theme={isDark ? 'dark' : 'light'}
-            onEmojiClick={handleEmojiClick}
-            lazyLoadEmojis
-            width={320}
-            height={380}
-          />
+        <div
+          className="fixed sm:absolute inset-0 sm:inset-auto sm:bottom-20 sm:right-6 z-50 flex items-end sm:items-center justify-center p-2 sm:p-0 bg-black/40 sm:bg-transparent backdrop-blur-xs sm:backdrop-blur-none"
+          onClick={() => setShowEmojiPicker(false)}
+        >
+          <div
+            className="w-full max-w-[340px] sm:w-[320px] bg-white dark:bg-slate-900 shadow-2xl rounded-3xl border-2 border-emerald-300 dark:border-emerald-700 overflow-hidden animate-slide-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-3 py-2 border-b border-emerald-100 dark:border-emerald-800/60 sm:hidden">
+              <span className="text-xs font-bold text-slate-800 dark:text-emerald-200">Select Emoji</span>
+              <button
+                onClick={() => setShowEmojiPicker(false)}
+                className="p-1 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <EmojiPicker
+              theme={isDark ? 'dark' : 'light'}
+              onEmojiClick={handleEmojiClick}
+              lazyLoadEmojis
+              width="100%"
+              height={360}
+            />
+          </div>
         </div>
       )}
 
       {/* 5. Floating Message Composer */}
-      <footer className="p-3 sm:p-4 border-t border-emerald-200/80 dark:border-emerald-900/60 bg-white/95 dark:bg-[#041d15]/95 backdrop-blur-xl">
-        <form onSubmit={handleSendMessage} className="flex items-center gap-2 max-w-5xl mx-auto">
+      <footer className="p-2 sm:p-4 border-t border-emerald-200/80 dark:border-emerald-900/60 bg-white/95 dark:bg-[#041d15]/95 backdrop-blur-xl">
+        <form onSubmit={handleSendMessage} className="flex items-center gap-1.5 sm:gap-2 max-w-5xl mx-auto">
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900 border border-emerald-200 dark:border-emerald-800/80 transition-all cursor-pointer shadow-sm"
+            className="p-2.5 sm:p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900 border border-emerald-200 dark:border-emerald-800/80 transition-all cursor-pointer shadow-sm active:scale-95 flex-shrink-0"
             title="Attach Image"
           >
-            <Paperclip className="w-5 h-5" />
+            <Paperclip className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
 
           <button
             type="button"
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            className={`p-3 rounded-2xl transition-all cursor-pointer border shadow-sm ${
+            className={`p-2.5 sm:p-3 rounded-2xl transition-all cursor-pointer border shadow-sm active:scale-95 flex-shrink-0 ${
               showEmojiPicker
                 ? 'bg-emerald-600 text-white border-emerald-500'
                 : 'bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900 border-emerald-200 dark:border-emerald-800/80'
             }`}
           >
-            <Smile className="w-5 h-5" />
+            <Smile className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
 
           <input
@@ -591,23 +635,23 @@ const ChatWindow = ({ onBack }) => {
             onChange={handleInputChange}
             placeholder={
               editingMessage
-                ? 'Edit your message...'
+                ? 'Edit message...'
                 : `Message ${displayName || 'chat'}...`
             }
-            className="flex-1 px-4 py-3.5 rounded-2xl bg-emerald-50/50 dark:bg-[#02130e] border-2 border-emerald-200/80 dark:border-emerald-800/80 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-emerald-600/60 text-sm font-medium outline-none transition-all"
+            className="flex-1 min-w-0 px-3 sm:px-4 py-2.5 sm:py-3.5 rounded-2xl bg-emerald-50/50 dark:bg-[#02130e] border-2 border-emerald-200/80 dark:border-emerald-800/80 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-emerald-600/60 text-xs sm:text-sm font-medium outline-none transition-all"
           />
 
           <button
             type="submit"
             disabled={!inputContent.trim() || sending}
-            className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-green-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-40 text-white transition-all shadow-lg shadow-emerald-600/25 active:scale-95 flex items-center justify-center cursor-pointer"
+            className="p-2.5 sm:p-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-green-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-40 text-white transition-all shadow-lg shadow-emerald-600/25 active:scale-95 flex items-center justify-center cursor-pointer flex-shrink-0"
           >
             {sending ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
+              <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
             ) : editingMessage ? (
-              <Check className="w-5 h-5" />
+              <Check className="w-4 h-4 sm:w-5 sm:h-5" />
             ) : (
-              <Send className="w-5 h-5" />
+              <Send className="w-4 h-4 sm:w-5 sm:h-5" />
             )}
           </button>
         </form>

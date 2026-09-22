@@ -22,6 +22,9 @@ export const setupSocket = (io) => {
       userSockets.add(socket.id);
       userSocketMap.set(userId, userSockets);
 
+      // Join personal user room for targeted notifications and multidevice sync
+      socket.join(`user:${userId}`);
+
       console.log(`⚡ User connected: ${userId} (Socket: ${socket.id})`);
 
       // Update user isOnline in MongoDB
@@ -56,8 +59,10 @@ export const setupSocket = (io) => {
     socket.on('send_message', (messageData) => {
       const { conversationId } = messageData;
       if (conversationId) {
-        // Broadcast to everyone in the room (including sender or others)
+        // Broadcast to conversation room and to all connected sockets
         socket.to(conversationId).emit('receive_message', messageData);
+        // Also broadcast to other active sockets so sidebars update in real time
+        socket.broadcast.emit('receive_message', messageData);
       }
     });
 
@@ -89,6 +94,10 @@ export const setupSocket = (io) => {
           conversationId,
           readerId,
         });
+        socket.broadcast.emit('message_read', {
+          conversationId,
+          readerId,
+        });
       }
     });
 
@@ -96,6 +105,7 @@ export const setupSocket = (io) => {
     socket.on('edit_message', (updatedMessage) => {
       if (updatedMessage?.conversationId) {
         socket.to(updatedMessage.conversationId).emit('message_edited', updatedMessage);
+        socket.broadcast.emit('message_edited', updatedMessage);
       }
     });
 
@@ -106,6 +116,10 @@ export const setupSocket = (io) => {
           conversationId,
           messageId,
         });
+        socket.broadcast.emit('message_deleted', {
+          conversationId,
+          messageId,
+        });
       }
     });
 
@@ -113,6 +127,7 @@ export const setupSocket = (io) => {
     socket.on('delete_conversation', ({ conversationId }) => {
       if (conversationId) {
         socket.to(conversationId).emit('conversation_deleted', { conversationId });
+        socket.broadcast.emit('conversation_deleted', { conversationId });
       }
     });
 

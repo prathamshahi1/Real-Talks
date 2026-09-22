@@ -61,40 +61,46 @@ const GroupInfoModal = ({ isOpen, onClose, group }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 dark:bg-slate-950/85 backdrop-blur-md animate-fade-in">
-      <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] transition-colors">
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-2 sm:p-4 bg-slate-950/70 dark:bg-slate-950/85 backdrop-blur-md animate-fade-in"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-md bg-white dark:bg-[#05261b] border-2 border-emerald-200 dark:border-emerald-800/80 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[88dvh] transition-colors animate-slide-up"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
-        <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-          <h3 className="font-bold text-slate-900 dark:text-white text-base">Group Details</h3>
+        <div className="p-4 sm:p-5 border-b border-emerald-100 dark:border-emerald-900/60 flex items-center justify-between">
+          <h3 className="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base">Group Details</h3>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-emerald-100/50 dark:hover:bg-emerald-900/60 transition-colors cursor-pointer active:scale-95"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Profile Card */}
-        <div className="p-6 text-center border-b border-slate-200 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40">
+        <div className="p-5 sm:p-6 text-center border-b border-emerald-100 dark:border-emerald-900/60 bg-emerald-50/50 dark:bg-[#03150f]/60">
           <img
             src={group.groupAvatar}
             alt={group.groupName}
-            className="w-20 h-20 rounded-3xl bg-slate-100 dark:bg-slate-800 border-2 border-indigo-500/40 object-cover mx-auto shadow-md mb-3"
+            className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-white dark:bg-emerald-950 border-2 border-emerald-400 object-cover mx-auto shadow-md mb-2.5 sm:mb-3"
           />
-          <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">{group.groupName}</h2>
-          <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium mt-0.5">
+          <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white truncate">{group.groupName}</h2>
+          <p className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold mt-0.5">
             Group • {group.participants?.length || 0} participants
           </p>
           {group.groupDescription && (
-            <p className="text-xs text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900/70 p-3 rounded-xl border border-slate-200 dark:border-slate-800/80 mt-3 italic">
+            <p className="text-xs text-slate-600 dark:text-emerald-200 bg-white dark:bg-[#02130e] p-3 rounded-xl border border-emerald-200 dark:border-emerald-800/80 mt-2.5 sm:mt-3 italic">
               &quot;{group.groupDescription}&quot;
             </p>
           )}
         </div>
 
         {/* Member List */}
-        <div className="p-5 flex-1 overflow-y-auto space-y-3">
-          <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+        <div className="p-4 sm:p-5 flex-1 overflow-y-auto space-y-2.5 overscroll-contain">
+          <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-emerald-400/80">
             <span>Members ({group.participants?.length})</span>
           </div>
 
@@ -110,44 +116,44 @@ const GroupInfoModal = ({ isOpen, onClose, group }) => {
               return (
                 <div
                   key={memberIdStr}
-                  className="flex items-center justify-between p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800/70"
+                  className="flex items-center justify-between p-2.5 rounded-2xl bg-emerald-50/50 dark:bg-[#03150f]/80 border border-emerald-200/80 dark:border-emerald-800/60"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 pr-2">
                     <img
                       src={member.avatar}
                       alt={member.name}
-                      className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 object-cover"
+                      className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white dark:bg-emerald-950 object-cover border border-emerald-300 dark:border-emerald-700 flex-shrink-0"
                     />
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <h4 className="text-xs font-semibold text-slate-900 dark:text-white">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate">
                           {member.name} {isMe && '(You)'}
                         </h4>
                         {isMemberCreator && (
-                          <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-50 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/30 text-amber-700 dark:text-amber-300 text-[9px] font-bold">
+                          <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-amber-50 dark:bg-amber-500/15 border border-amber-300 dark:border-amber-500/30 text-amber-700 dark:text-amber-300 text-[9px] font-extrabold flex-shrink-0">
                             <Crown className="w-2.5 h-2.5" />
                             Creator
                           </span>
                         )}
                         {!isMemberCreator && isMemberAdmin && (
-                          <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-300 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-300 text-[9px] font-bold">
+                          <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-300 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-[9px] font-extrabold flex-shrink-0">
                             <Shield className="w-2.5 h-2.5" />
                             Admin
                           </span>
                         )}
                       </div>
-                      <p className="text-[10px] text-slate-400 font-mono">@{member.username}</p>
+                      <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono truncate">@{member.username}</p>
                     </div>
                   </div>
 
                   {isCurrentUserAdmin && !isMe && (
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 flex-shrink-0">
                       {!isMemberAdmin && (
                         <button
                           onClick={() => handlePromote(memberIdStr)}
                           disabled={loadingAction}
                           title="Make Group Admin"
-                          className="p-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30 text-xs transition-colors cursor-pointer"
+                          className="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/60 hover:bg-emerald-200 dark:hover:bg-emerald-800/60 text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700/60 text-xs transition-colors cursor-pointer active:scale-95"
                         >
                           <Shield className="w-3.5 h-3.5" />
                         </button>
@@ -157,7 +163,7 @@ const GroupInfoModal = ({ isOpen, onClose, group }) => {
                           onClick={() => handleRemove(memberIdStr)}
                           disabled={loadingAction}
                           title="Remove from group"
-                          className="p-1.5 rounded-lg bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30 text-xs transition-colors cursor-pointer"
+                          className="p-1.5 rounded-lg bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30 text-xs transition-colors cursor-pointer active:scale-95"
                         >
                           <UserMinus className="w-3.5 h-3.5" />
                         </button>
@@ -171,18 +177,18 @@ const GroupInfoModal = ({ isOpen, onClose, group }) => {
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/60">
+        <div className="p-3.5 sm:p-4 border-t border-emerald-100 dark:border-emerald-900/60 bg-emerald-50/50 dark:bg-[#03150f]/80">
           <button
             onClick={handleLeave}
             disabled={loadingAction}
-            className="w-full py-2.5 rounded-xl bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30 text-xs font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full py-2.5 rounded-2xl bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30 text-xs font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer active:scale-98"
           >
             {loadingAction ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
             ) : (
               <LogOut className="w-3.5 h-3.5" />
             )}
-            <span>Leave Group</span>
+            <span>Leave Group Channel</span>
           </button>
         </div>
       </div>

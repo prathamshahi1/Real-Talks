@@ -84,17 +84,17 @@ const ChatSidebar = ({ onOpenSearch, onOpenCreateGroup }) => {
   });
 
   return (
-    <aside className="w-full md:w-80 lg:w-96 flex-shrink-0 flex flex-col bg-white/90 dark:bg-[#041911]/95 border-r border-emerald-200/80 dark:border-emerald-900/60 h-full transition-colors duration-300">
+    <aside className="w-full md:w-80 lg:w-96 flex-shrink-0 flex flex-col bg-white/95 dark:bg-[#041911]/95 border-r border-emerald-200/80 dark:border-emerald-900/60 h-full transition-colors duration-300">
       {/* Sidebar Top Header */}
-      <div className="p-4 border-b border-emerald-100 dark:border-emerald-900/50 flex items-center justify-between">
+      <div className="p-3.5 sm:p-4 border-b border-emerald-100 dark:border-emerald-900/50 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-emerald-600/30">
-            <MessageSquare className="w-5 h-5" />
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-emerald-600/30">
+            <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
           <div>
-            <h2 className="font-extrabold text-slate-900 dark:text-white text-base leading-tight">Chats</h2>
+            <h2 className="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base leading-tight">Messages</h2>
             <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
-              {conversations.length} Active Channels
+              {conversations.length} Active {conversations.length === 1 ? 'Conversation' : 'Conversations'}
             </p>
           </div>
         </div>
@@ -103,7 +103,7 @@ const ChatSidebar = ({ onOpenSearch, onOpenCreateGroup }) => {
         <div className="flex items-center gap-1.5">
           <button
             onClick={onOpenCreateGroup}
-            className="p-2.5 rounded-xl bg-teal-50 dark:bg-teal-950/60 hover:bg-teal-100 dark:hover:bg-teal-900/60 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-700/60 transition-all cursor-pointer shadow-sm"
+            className="p-2 sm:p-2.5 rounded-xl bg-teal-50 dark:bg-teal-950/60 hover:bg-teal-100 dark:hover:bg-teal-900/60 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-700/60 transition-all cursor-pointer shadow-sm active:scale-95"
             title="Create Group"
           >
             <Users className="w-4 h-4" />
@@ -111,7 +111,7 @@ const ChatSidebar = ({ onOpenSearch, onOpenCreateGroup }) => {
 
           <button
             onClick={onOpenSearch}
-            className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700/60 transition-all cursor-pointer shadow-sm"
+            className="p-2 sm:p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700/60 transition-all cursor-pointer shadow-sm active:scale-95"
             title="New Direct Message"
           >
             <UserPlus className="w-4 h-4" />
@@ -128,15 +128,15 @@ const ChatSidebar = ({ onOpenSearch, onOpenCreateGroup }) => {
             value={filterQuery}
             onChange={(e) => setFilterQuery(e.target.value)}
             placeholder="Search chats or channels..."
-            className="w-full pl-10 pr-3 py-2.5 rounded-2xl bg-emerald-50/60 dark:bg-[#02130d] border border-emerald-200 dark:border-emerald-800/80 focus:border-emerald-500 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-emerald-600/60 text-xs font-medium outline-none transition-all"
+            className="w-full pl-10 pr-3 py-2 sm:py-2.5 rounded-2xl bg-emerald-50/60 dark:bg-[#02130d] border border-emerald-200 dark:border-emerald-800/80 focus:border-emerald-500 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-emerald-600/60 text-xs font-medium outline-none transition-all"
           />
         </div>
 
         {/* Filter Pills */}
-        <div className="flex items-center gap-1.5 pt-1">
+        <div className="flex items-center gap-1.5 pt-0.5">
           <button
             onClick={() => setFilterType('all')}
-            className={`px-3 py-1 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${
+            className={`flex-1 py-1.5 rounded-xl text-[11px] font-bold transition-all cursor-pointer text-center ${
               filterType === 'all'
                 ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/30'
                 : 'bg-slate-100 dark:bg-[#021810] text-slate-600 dark:text-emerald-400/80 hover:bg-emerald-50 dark:hover:bg-emerald-950'
@@ -146,7 +146,7 @@ const ChatSidebar = ({ onOpenSearch, onOpenCreateGroup }) => {
           </button>
           <button
             onClick={() => setFilterType('direct')}
-            className={`px-3 py-1 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${
+            className={`flex-1 py-1.5 rounded-xl text-[11px] font-bold transition-all cursor-pointer text-center ${
               filterType === 'direct'
                 ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/30'
                 : 'bg-slate-100 dark:bg-[#021810] text-slate-600 dark:text-emerald-400/80 hover:bg-emerald-50 dark:hover:bg-emerald-950'
@@ -156,7 +156,7 @@ const ChatSidebar = ({ onOpenSearch, onOpenCreateGroup }) => {
           </button>
           <button
             onClick={() => setFilterType('group')}
-            className={`px-3 py-1 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${
+            className={`flex-1 py-1.5 rounded-xl text-[11px] font-bold transition-all cursor-pointer text-center ${
               filterType === 'group'
                 ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/30'
                 : 'bg-slate-100 dark:bg-[#021810] text-slate-600 dark:text-emerald-400/80 hover:bg-emerald-50 dark:hover:bg-emerald-950'
@@ -168,7 +168,7 @@ const ChatSidebar = ({ onOpenSearch, onOpenCreateGroup }) => {
       </div>
 
       {/* Conversations List */}
-      <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
+      <div className="flex-1 overflow-y-auto p-2 space-y-1.5 overscroll-contain">
         {loadingConversations ? (
           <div className="flex flex-col items-center justify-center py-16 text-emerald-600 dark:text-emerald-400 text-xs gap-2">
             <Loader2 className="w-6 h-6 animate-spin" />
@@ -188,13 +188,13 @@ const ChatSidebar = ({ onOpenSearch, onOpenCreateGroup }) => {
             <div className="flex items-center gap-2 pt-1">
               <button
                 onClick={onOpenSearch}
-                className="px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-500 transition-colors shadow-sm"
+                className="px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-500 transition-colors shadow-sm cursor-pointer active:scale-95"
               >
                 Find Users
               </button>
               <button
                 onClick={onOpenCreateGroup}
-                className="px-3.5 py-1.5 rounded-xl bg-teal-600 text-white text-xs font-bold hover:bg-teal-500 transition-colors shadow-sm"
+                className="px-3.5 py-1.5 rounded-xl bg-teal-600 text-white text-xs font-bold hover:bg-teal-500 transition-colors shadow-sm cursor-pointer active:scale-95"
               >
                 Create Group
               </button>
@@ -222,10 +222,10 @@ const ChatSidebar = ({ onOpenSearch, onOpenCreateGroup }) => {
               <div
                 key={conv._id}
                 onClick={() => selectConversation(conv)}
-                className={`group flex items-center gap-3 p-3 rounded-2xl transition-all cursor-pointer relative ${
+                className={`group flex items-center gap-3 p-2.5 sm:p-3 rounded-2xl transition-all cursor-pointer relative ${
                   isSelected
                     ? 'bg-gradient-to-r from-emerald-600/15 via-teal-600/10 to-transparent dark:from-emerald-500/25 dark:via-teal-500/15 border-2 border-emerald-500 dark:border-emerald-400 shadow-md shadow-emerald-500/10'
-                    : 'hover:bg-emerald-50/80 dark:hover:bg-emerald-950/40 border-2 border-transparent'
+                    : 'hover:bg-emerald-50/80 dark:hover:bg-emerald-950/40 border-2 border-transparent active:bg-emerald-100/60 dark:active:bg-emerald-950/60'
                 }`}
               >
                 {/* Avatar with Glow Ring */}
@@ -233,7 +233,7 @@ const ChatSidebar = ({ onOpenSearch, onOpenCreateGroup }) => {
                   <img
                     src={avatarUrl}
                     alt={displayName}
-                    className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-950 object-cover border-2 border-emerald-300 dark:border-emerald-700 shadow-sm"
+                    className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-950 object-cover border-2 border-emerald-300 dark:border-emerald-700 shadow-sm"
                   />
                   {isGroup ? (
                     <span className="absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded-md bg-teal-600 text-[9px] font-bold text-white shadow-sm flex items-center gap-0.5 ring-2 ring-white dark:ring-[#041911]">
@@ -248,7 +248,7 @@ const ChatSidebar = ({ onOpenSearch, onOpenCreateGroup }) => {
 
                 {/* Conversation Meta */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center justify-between mb-0.5">
                     <h4
                       className={`text-sm font-extrabold truncate ${
                         isSelected
@@ -287,11 +287,11 @@ const ChatSidebar = ({ onOpenSearch, onOpenCreateGroup }) => {
                         </span>
                       )}
 
-                      {/* Manual Delete Chat Button on Hover */}
+                      {/* Delete Chat Button */}
                       <button
                         onClick={(e) => handleDeleteChat(e, conv._id, displayName)}
                         title="Delete this chat"
-                        className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-950/70 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-all cursor-pointer"
+                        className="opacity-60 sm:opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-950/70 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-all cursor-pointer active:scale-95"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
